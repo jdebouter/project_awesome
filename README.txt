@@ -1,0 +1,1 @@
+Jonathan: I'm using Anaconda 3 distribution with Python 3.6 and networkx version 1.11
