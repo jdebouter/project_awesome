@@ -28,7 +28,7 @@ def run_simulation(network, T):
             
             # After the loaning/borrowing segment, recompute the unbalanced local money
             
-        # Check for bankruptcy
+        # Check for bankruptcy and propagate any avalanches
         if node[1]['capital'] <= network.graph['Ts'] or node[1]['unbalanced'] <= network.graph['Tl']:
             node[1]['bankrupt'] = True
             # Make list of neighbors that loaned this bank money (we call them 'infected')
@@ -47,9 +47,11 @@ def run_simulation(network, T):
             if node[1]['bankrupt']:
                 # Reset the capital
                 node[1]['capital'] = 0
+                node[1]['unbalanced'] = 0
                 # Reset the associated edges. NOTE: node[0] is the NAME of this node (in string format)
                 for edge in network.edges([node[0]]):
                     network[edge[0]][edge[1]]['debt'] = 0  # network[node1][node2] gives the associated edge. This way of modifying the edge seems contrived and like it could be done easier, but I read that modifying the edge directly is a bad idea here: http://networkx.readthedocs.io/en/networkx-1.11/tutorial/tutorial.html#accessing-edges
                     network[edge[0]][edge[1]]['loaner'] = None
+                    network[edge[0]][edge[1]]['borrower'] = None
                 # no longer bankrupt
                 node[1]['bankrupt'] = False
