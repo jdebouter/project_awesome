@@ -41,7 +41,7 @@ def _addAttributes(G, Tl, Ts):
     G.graph['Ts'] = Ts
     # Add banking capital attribute and bankruptcy attributes to all nodes (initialize at 0 and False)
     nx.set_node_attributes(G, 'capital', 0)
-    nx.set_node_attributes(G, 'unbalanced', 0)
+    nx.set_node_attributes(G, 'liquidity', 0)
     nx.set_node_attributes(G, 'bankrupt', False)
     # Add a debt attribute to every edge (and a attribute describing to whom the debt is owed)
     nx.set_edge_attributes(G, 'debt', 0)
