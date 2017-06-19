@@ -20,7 +20,6 @@ def run_simulation(network, T):
             # [1] gets the node associated dictionary with attributes    
             node[1]['capital'] += random.choice([-1, 1])   
         
-
         # Invest surplus or loan to compensate loss, based on rules:
             # If current capital > 0, invest, otherwise borrow capital
             # 
@@ -31,13 +30,12 @@ def run_simulation(network, T):
                 
             # Remember that we also have to record the avalanches somehow
             
-            
-        # Create new balanced banks (capital = 0) in places of failed banks
-        for node in network.nodes_iter(data=True):
+        # Create new balanced banks in places of failed/bankrupt banks
+        for node in network.nodes_iter(data=True):  # data=True makes it retrieve all extra attributes
             if node[1]['bankrupt']:
                 # Reset the capital
                 node[1]['capital'] = 0
-                # Reset the edges. NOTE: node[0] is the NAME of this node (in string format)
+                # Reset the associated edges. NOTE: node[0] is the NAME of this node (in string format)
                 for edge in network.edges([node[0]]):
                     network[edge[0]][edge[1]]['debt'] = 0  # network[node1][node2] gives the associated edge. This way of modifying the edge seems contrived and like it could be done easier, but I read that modifying the edge directly is a bad idea here: http://networkx.readthedocs.io/en/networkx-1.11/tutorial/tutorial.html#accessing-edges
                     network[edge[0]][edge[1]]['loaner'] = None
