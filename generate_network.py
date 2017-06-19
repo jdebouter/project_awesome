@@ -39,5 +39,9 @@ def _addAttributes(G, Tl, Ts):
     # Add the liquidity threshold and solvency threshold
     G.graph['Tl'] = Tl
     G.graph['Ts'] = Ts
-    # Add a banking capital attribute theta to all nodes. Initialize at 0
-    nx.set_node_attributes(G, 'theta', 0)
+    # Add banking capital attribute and bankruptcy attributes to all nodes (initialize at 0 and False)
+    nx.set_node_attributes(G, 'capital', 0)
+    nx.set_node_attributes(G, 'bankrupt', False)
+    # Add a debt attribute to every edge (and a attribute describing to whom the debt is owed)
+    nx.set_edge_attributes(G, 'debt', 0)
+    nx.set_edge_attributes(G, 'loaner', None)
