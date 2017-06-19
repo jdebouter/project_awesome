@@ -23,7 +23,7 @@ def run_simulation(network, T):
             node[1]['capital'] += delta
             node[1]['unbalanced'] += delta
                     
-        # Invest surplus or loan to compensate loss, based on rules:
+        # Invest surplus or borrow money to compensate loss, based on rules:
             # If current capital > 0, invest, otherwise borrow capital
             
             # After the loaning/borrowing segment, recompute the unbalanced local money
@@ -31,11 +31,14 @@ def run_simulation(network, T):
         # Check for bankruptcy
         if node[1]['capital'] <= network.graph['Ts'] or node[1]['unbalanced'] <= network.graph['Tl']:
             node[1]['bankrupt'] = True
-            # Make list of neighbors that loaned this bank money
-            ngbr_edges = 
-            # For each neighbor that loaned this bank money, have them try to get their lost money back (this should propagate any potential avalanche)
-
-#            for neighbor in [n for n in network.neighbors(node[0]) if :
+            # Make list of neighbors that loaned this bank money (we call them 'infected')
+            infected = []
+            my_edges = network.edges([node[0]], data=True)
+            for edge in my_edges:
+                if edge[2]['debt'] > 0 and edge[2]['borrower'] == node[0]:  # If this node borrowed from someone
+                    infected.append(edge[2]['loaner'])  # Add that someone to the infected
+            # For each 'infected' neighbor, have them try to get their lost money back (this should propagate any potential avalanche)
+            for node in infected:
                 
             # Remember that we also have to record the avalanches somehow
             
