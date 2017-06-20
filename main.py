@@ -15,27 +15,20 @@ import matplotlib.pyplot as plt
 network = gn.regular_network(L = 3, d = 2, Tl = -4, Ts = -6)
 
 # DEBUG
-network.node[(0,0)]['liquidity'] = 4
-network.edge[(0,0)][(0,1)]['debt'] = 5
-network.edge[(0,0)][(0,1)]['borrower'] = (0,0)
-network.edge[(0,0)][(0,1)]['loaner'] = (0,1)
-network.edge[(0,0)][(1,0)]['debt'] = 3
-network.edge[(0,0)][(1,0)]['borrower'] = (0,0)
-network.edge[(0,0)][(1,0)]['loaner'] = (1,0)
-
-
+dn._perturb(network)
+for node in network.nodes_iter(data=True):
+    print(node)
+print()
+for edge in network.edges_iter(data=True):
+    print(edge)
+    
+dn._invest_surplus_liquidity(network)
+print("\n\n\n")
 for node in network.nodes(data=True):
     print(node)
-print(network.edge[(0,0)][(0,1)])
-print(network.edge[(0,0)][(1,0)])
-
-dn._repay_debts(network)
-
-print("\n")
-for node in network.nodes(data=True):
-    print(node)
-print(network.edge[(0,0)][(0,1)])
-print(network.edge[(0,0)][(1,0)])
+print()
+for edge in network.edges_iter(data=True):
+    print(edge)
 
 # Run the simulation for 1 iteration
 #dn.run_simulation(network, 1)
