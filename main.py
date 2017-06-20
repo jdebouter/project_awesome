@@ -2,8 +2,6 @@
 """ ===========================================================================
 
 This script is where we adjust parameters and run the model
-(although I think it makes sense to define the details of running the model in
-dynamics_network.py)
 
 =========================================================================== """
 
@@ -17,8 +15,27 @@ import matplotlib.pyplot as plt
 network = gn.regular_network(L = 3, d = 2, Tl = -4, Ts = -6)
 
 # DEBUG
-#my_edges = network.edges([(0,0)], data=True)
-#print(my_edges)
+network.node[(0,0)]['liquidity'] = 4
+network.edge[(0,0)][(0,1)]['debt'] = 5
+network.edge[(0,0)][(0,1)]['borrower'] = (0,0)
+network.edge[(0,0)][(0,1)]['loaner'] = (0,1)
+network.edge[(0,0)][(1,0)]['debt'] = 3
+network.edge[(0,0)][(1,0)]['borrower'] = (0,0)
+network.edge[(0,0)][(1,0)]['loaner'] = (1,0)
+
+
+for node in network.nodes(data=True):
+    print(node)
+print(network.edge[(0,0)][(0,1)])
+print(network.edge[(0,0)][(1,0)])
+
+dn._repay_debts(network)
+
+print("\n")
+for node in network.nodes(data=True):
+    print(node)
+print(network.edge[(0,0)][(0,1)])
+print(network.edge[(0,0)][(1,0)])
 
 # Run the simulation for 1 iteration
 #dn.run_simulation(network, 1)
