@@ -84,13 +84,13 @@ def _repay_debts(network):
                         if our_edge['debt'] == 0:  # Reset the borrower/loaner attributes if the debt is payed now
                             our_edge['borrower'] = None
                             our_edge['loaner'] = None
-                        # Detract from my liquidity
+                        # Subtract from my liquidity
                         node[1]['liquidity'] = 0
                     # Else pay off the debt and move on to the next loaner
                     else:
                         # Add to loaners liquidity
                         network.node[max_loaner]['liquidity'] += our_edge['debt']
-                        # Detract from my liquidity
+                        # Subtract from my liquidity
                         node[1]['liquidity'] -= our_edge['debt']
                         # Update the associated edge
                         our_edge['debt'] = 0
@@ -121,11 +121,11 @@ def _invest_surplus_liquidity(network):
                         our_edge['debt'] += node[1]['liquidity']
                         our_edge['borrower'] = least_broke
                         our_edge['loaner'] = node[0]
-                        # Detract from my liquidity
+                        # Subtract from my liquidity
                         node[1]['liquidity'] = 0
                     # else we have more liquidity than needed to restore this neighbor to balance, so do it and move on
                     else:                        
-                        # Detract from my liquidity
+                        # Subtract from my liquidity
                         node[1]['liquidity'] += broke_neighbors[least_broke]
                         # Update associated edge
                         our_edge['debt'] += -broke_neighbors[least_broke]
@@ -133,19 +133,23 @@ def _invest_surplus_liquidity(network):
                         our_edge['loaner'] = node[0]
                         # Add to broke neighbor's liquidity
                         network.node[least_broke]['liquidity'] = 0
+                        # Move on to next neighbor with negative liquidity, or STOP if there's none left
+                        broke_neighbors.pop(least_broke)
+                        if len(broke_neighbors) == 0:
+                            break
     
 ''' UNFINISHED. Check for bankrupty and spread infections. Note, I'm calling it 
     avalanche now to distinguish between:
     - avalanche: cascade of failures
     - infection: cascade of banks trying to regain balance by asking money from borrowers '''
-def _check_and_propagate_avalanche(network, avalanches):
+def _check_and_propagate_avalanche(network, avalanche_sizes):
     a_bank_is_bankrupt = False  # Is any bank bankrupt?
     bankrupt_banks = []  # list of names currently bankrupt banks (used during avalanche propagation)
     
     # Is any bank bankrupt?
     a_bank_is_bankrupt, bankrupt_banks = __find_bankruptcies(network)
     if a_bank_is_bankrupt:  # A new avalanche has started, record it
-        avalanches.append(0)
+        avalanche_sizes.append(0)
             
     # While any bank is bankrupt, propagate the failure avalanche
     while a_bank_is_bankrupt:
@@ -165,7 +169,7 @@ def _check_and_propagate_avalanche(network, avalanches):
         a_bank_is_bankrupt, bankrupt_banks = __find_bankruptcies(network)
         
         # Increment the current avalanche
-        avalanches[-1] += 1
+        avalanche_sizes[-1] += 1
 
 ''' After avalanche propagation is done, reset bankrupt banks to balanced bankss '''
 def _reset_bankrupt_banks(network):
