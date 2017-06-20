@@ -34,7 +34,7 @@ def barabasi_albert_network(N, m, Tl, Ts):
     return G
 
 ''' Add all of the attributes like banking capital theta and thresholds to the
-    graph, nodes and edges '''
+    graph, nodes and dges '''
 def _addAttributes(G, Tl, Ts):
     # Add the liquidity threshold and solvency threshold
     G.graph['Tl'] = Tl

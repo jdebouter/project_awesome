@@ -21,7 +21,7 @@ network = gn.regular_network(L = 3, d = 2, Tl = -4, Ts = -6)
 #print(my_edges)
 
 # Run the simulation for 1 iteration
-dn.run_simulation(network, 1)
+#dn.run_simulation(network, 1)
 
 # Draw the graph. NOTE: networkx has some basic drawing functionality but it
 # takes too long for me to draw 100x100
