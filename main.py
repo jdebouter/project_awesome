@@ -14,11 +14,11 @@ import matplotlib.pyplot as plt
 
 # Build a network corresponding to regular grid with d dimensions of size L, 
 # with liquidity threshold -4 and solvency threshold -6
-network = gn.regular_network(L = 2, d = 2, Tl = -4, Ts = -6)
+network = gn.regular_network(L = 3, d = 2, Tl = -4, Ts = -6)
 
-# Debug/print
-#for item in list(network.nodes(data=True)):
-#    print(item)
+# DEBUG
+#my_edges = network.edges([(0,0)], data=True)
+#print(my_edges)
 
 # Run the simulation for 1 iteration
 dn.run_simulation(network, 1)
