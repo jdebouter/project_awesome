@@ -26,6 +26,14 @@ of the associated nodes, while e[2] gives the dictionary with extra attributes.
 It should also be noted that these names DON'T have to be strings. In fact,
 for the lattice/regular network they're tuples of integers, eg (0,1)
 
+NOTE: I think this could be a difference between my implementation and the
+article: when infected nodes lose capital due to a neighboring node failing,
+they proceed to recover ALL loaned money. I felt like this is what the 
+article implied in the rule section, in the 5th bullet point. However,
+I could imagine they only recover the amount of loaned money they lost, 
+which would reduce the amount of avalanches I think. Maybe that's how they 
+implemented it?
+
 =========================================================================== """
 
 import random
