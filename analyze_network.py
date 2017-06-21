@@ -1,4 +1,10 @@
-# Testing.
+""" ===========================================================================
+
+This script is where we define the functions for network analysis.
+
+=========================================================================== """
+
+
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
