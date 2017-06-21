@@ -26,12 +26,6 @@ of the associated nodes, while e[2] gives the dictionary with extra attributes.
 It should also be noted that these names DON'T have to be strings. In fact,
 for the lattice/regular network they're tuples of integers, eg (0,1)
 
-Note: not sure if this is important, because I'm not sure if this situation
-ever arises: if a bank fails while it has a loan extended to a neighbor, 
-that neighbor's capital/liquidity should just increase by that loan I think
-(and the edge should be cleared). Right now this is not implemented as I'm
-assuming this situation never arises, because banks that fail have already
-recovered any debts
 =========================================================================== """
 
 import networkx as nx
@@ -141,7 +135,7 @@ def _invest_surplus_liquidity(network):
                         if len(broke_neighbors) == 0:
                             break
     
-''' UNTESTED. Check for bankrupty and spread infections. Note, I'm calling it 
+''' Check for bankrupty and spread infections. Note, I'm calling it 
     avalanche now to distinguish between:
     - avalanche: cascade of failures
     - infection: cascade of banks trying to regain balance by asking money from borrowers '''
