@@ -43,7 +43,7 @@ def barabasi_albert_network(N, m, Tl, Ts):
     c impacts the number of nodes (See paper for more info).
     m impacts the number of hubs (See paper for more info).
     NOTE: I would suggest not changing c and m, because the algorithm is quite 
-    sensitive to there values. 
+    sensitive to their values. 
     '''
 def mean_field_network(N, Tl, Ts, c = 1, m = 0.52):
     G = _mean_field_graph(N, Tl, Ts, c, m)

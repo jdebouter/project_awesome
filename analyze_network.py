@@ -17,9 +17,11 @@ def print_network(network):
     for edge in network.edges_iter(data=True):
         print(edge)
 
-def histogram_avalanches(avalanche_sizes, num_bins = 10):
+def histogram_avalanches(avalanche_sizes, num_bins = 10, y_scale = 'linear', x_scale = 'linear'):
     results_histogram = np.histogram(avalanche_sizes, bins=num_bins)
-    plt.plot(range(num_bins), results_histogram[0])
+    plt.plot(np.linspace(0, max(avalanche_sizes), num_bins), results_histogram[0])
+    plt.yscale(y_scale)
+    plt.xscale(x_scale)
     plt.xlabel("Avalanche Size")
     plt.ylabel("Frequency")
     plt.show()
