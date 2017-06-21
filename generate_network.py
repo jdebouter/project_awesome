@@ -17,15 +17,15 @@ def regular_network(L, d, Tl, Ts):
     # Build the graph
     G = nx.grid_graph([L for i in range(d)], periodic=False)
     # Add the extra attributes we need
-    _addBanks(G, Tl, Ts)
-    return G
+    FG = _addBanks(G, Tl, Ts)
+    return FG
 
 ''' Generate and return a random network of size N with link probability p.
     Tl is the liquidity threshold and Ts the solvency threshold. '''
 def random_network(N, p, Tl, Ts):
     G = nx.erdos_renyi_graph(N, p)
-    _addBanks(G, Tl, Ts)
-    return G
+    FG = _addBanks(G, Tl, Ts)
+    return FG
 
 ''' Generate and return a scale-free network of size N and with m the number 
     of edges that are added to new nodes each iteration during growth of the 
@@ -33,8 +33,8 @@ def random_network(N, p, Tl, Ts):
     Tl is the liquidity threshold and Ts the solvency threshold. '''
 def barabasi_albert_network(N, m, Tl, Ts):
     G = nx.barabasi_albert_graph(N, m)
-    _addBanks(G, Tl, Ts)
-    return G
+    FG = _addBanks(G, Tl, Ts)
+    return FG
 
 ''' Generate and return a scale-free network of size N using the mean field
     algorithm. 
@@ -48,8 +48,8 @@ def barabasi_albert_network(N, m, Tl, Ts):
     '''
 def mean_field_network(N, Tl, Ts, c = 1, m = 0.52):
     G = _mean_field_graph(N, Tl, Ts, c, m)
-    _addBanks(G, Tl, Ts)
-    return G
+    FG = _addBanks(G, Tl, Ts)
+    return FG
 
 
 ''' Add all of the attributes like banking capital theta and thresholds to the
@@ -73,7 +73,7 @@ def _addBanks(G, Tl, Ts):
 #    nx.set_edge_attributes(G, 'lender', None)
 #    nx.set_edge_attributes(G, 'borrower', None)
     # Replacing nodes using banks list for each network 
-    kk.linkBanks(G, banks)
+    return kk.linkBanks(G, banks)
 
 """ ===========================================================================
 
@@ -134,8 +134,8 @@ def _mean_field_graph(N, Tl, Ts, c, m):
         for j in range(i, N):
             if lending_freq[i, j] >= w_t:
                 G.add_edge(i, j)
-    _addBanks(G, Tl, Ts)
-    return G
+    FG = _addBanks(G, Tl, Ts)
+    return FG
 
 
 

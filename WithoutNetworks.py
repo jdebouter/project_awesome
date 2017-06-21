@@ -24,6 +24,7 @@ class Bank(object):
     def __init__(self, node, amount_inhand, amount_withothers = []):
         self.position = node
         self.capital = sum(amount_withothers) + amount_inhand
+        self.liquidity = amount_inhand
             
     def putNeighbours(self, neighbours, amount_withothers):
         self.neighbours = dict(zip(neighbours, amount_withothers))
@@ -32,6 +33,9 @@ class Bank(object):
     def getPosition(self):
         return self.position
     
+    def getLiquidity(self):
+        return self.liquidity
+        
     def getCapital(self):
         return self.capital
     
@@ -43,7 +47,10 @@ class Bank(object):
     
     def setPosition(self, pos):
         self.position = pos
-   
+    
+    def changeCapital(self, chng):
+        self.capital += chng
+        
     def __str__(self):
         return "The Bank %d had %d Capital" %(self.getPosition(), self.getCapital())
 
