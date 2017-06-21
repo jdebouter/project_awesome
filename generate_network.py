@@ -45,5 +45,5 @@ def _addAttributes(G, Tl, Ts):
     nx.set_node_attributes(G, 'bankrupt', False)
     # Add a debt attribute to every edge (and attributes describing to whom the debt is owed)
     nx.set_edge_attributes(G, 'debt', 0)
-    nx.set_edge_attributes(G, 'loaner', None)
+    nx.set_edge_attributes(G, 'lender', None)
     nx.set_edge_attributes(G, 'borrower', None)

@@ -18,7 +18,7 @@ NOTE FOR UNDERSTANDING SYNTAX:
 nodes look like this: 
     (name, {'capital': 0, 'liquidity': 0, 'bankrupt': False})
 edges like this: 
-    (name1, name2, {'debt': 0, 'loaner': None, 'borrower': None})
+    (name1, name2, {'debt': 0, 'lender': None, 'borrower': None})
     
 For a given node n and edge e, n[0] gives its name and n[1] gives
 the associated dictionary with extra attributes. e[0] and e[1] give the names
@@ -72,36 +72,36 @@ def _repay_debts(network):
     for node in network.nodes_iter(data=True):
         if node[1]['liquidity'] > 0:
             # Determine if this node is in debt, and to whom
-            in_debt, loaners = __find_loaners(network, node[0])  # loaners is a dict with names as keys and loansizes as values
+            in_debt, lenders = __find_lenders(network, node[0])  # lenders is a dict with names as keys and loansizes as values
             if in_debt:
-                # Repay as much as possible to the loaner associated with the highest current debt
+                # Repay as much as possible to the lender associated with the highest current debt
                 while node[1]['liquidity'] > 0:
-                    max_loaner = max(loaners, key=loaners.get)
-                    our_edge = network.edge[node[0]][max_loaner]
-                    # If the debt to that loaner is more than (or equal to) my liquidity, just give it all
-                    if loaners[max_loaner] >= node[1]['liquidity']:
-                        # Add to loaners liquidity
-                        network.node[max_loaner]['liquidity'] += node[1]['liquidity']
+                    max_lender = max(lenders, key=lenders.get)
+                    our_edge = network.edge[node[0]][max_lender]
+                    # If the debt to that lender is more than (or equal to) my liquidity, just give it all
+                    if lenders[max_lender] >= node[1]['liquidity']:
+                        # Add to lenders liquidity
+                        network.node[max_lender]['liquidity'] += node[1]['liquidity']
                         # Update the associated edge
                         our_edge['debt'] -= node[1]['liquidity']
-                        if our_edge['debt'] == 0:  # Reset the borrower/loaner attributes if the debt is payed now
+                        if our_edge['debt'] == 0:  # Reset the borrower/lender attributes if the debt is payed now
                             our_edge['borrower'] = None
-                            our_edge['loaner'] = None
+                            our_edge['lender'] = None
                         # Subtract from my liquidity
                         node[1]['liquidity'] = 0
-                    # Else pay off the debt and move on to the next loaner
+                    # Else pay off the debt and move on to the next lender
                     else:
-                        # Add to loaners liquidity
-                        network.node[max_loaner]['liquidity'] += our_edge['debt']
+                        # Add to lenders liquidity
+                        network.node[max_lender]['liquidity'] += our_edge['debt']
                         # Subtract from my liquidity
                         node[1]['liquidity'] -= our_edge['debt']
                         # Update the associated edge
                         our_edge['debt'] = 0
                         our_edge['borrower'] = None
-                        our_edge['loaner'] = None
-                        # move on to next loaner because there is liquidity left, or STOP if no loaners are left
-                        loaners.pop(max_loaner)
-                        if len(loaners) == 0:
+                        our_edge['lender'] = None
+                        # move on to next lender because there is liquidity left, or STOP if no lenders are left
+                        lenders.pop(max_lender)
+                        if len(lenders) == 0:
                             break
 
 ''' Banks with surplus liquidity try to invest in neighbors with negative liquidity '''
@@ -123,7 +123,7 @@ def _invest_surplus_liquidity(network):
                         # Update associated edge
                         our_edge['debt'] += node[1]['liquidity']
                         our_edge['borrower'] = least_broke
-                        our_edge['loaner'] = node[0]
+                        our_edge['lender'] = node[0]
                         # Subtract from my liquidity
                         node[1]['liquidity'] = 0
                     # else we have more liquidity than needed to restore this neighbor to balance, so do it and move on
@@ -133,7 +133,7 @@ def _invest_surplus_liquidity(network):
                         # Update associated edge
                         our_edge['debt'] += -broke_neighbors[least_broke]
                         our_edge['borrower'] = least_broke
-                        our_edge['loaner'] = node[0]
+                        our_edge['lender'] = node[0]
                         # Add to broke neighbor's liquidity
                         network.node[least_broke]['liquidity'] = 0
                         # Move on to next neighbor with negative liquidity, or STOP if there's none left
@@ -141,7 +141,7 @@ def _invest_surplus_liquidity(network):
                         if len(broke_neighbors) == 0:
                             break
     
-''' UNFINISHED. Check for bankrupty and spread infections. Note, I'm calling it 
+''' UNTESTED. Check for bankrupty and spread infections. Note, I'm calling it 
     avalanche now to distinguish between:
     - avalanche: cascade of failures
     - infection: cascade of banks trying to regain balance by asking money from borrowers '''
@@ -155,8 +155,8 @@ def _check_and_propagate_avalanche(network):
         for bankrupt_bank in bankrupt_banks:
             for neighbor in network.neighbors(bankrupt_bank):
                 our_edge = network.edge[bankrupt_bank][neighbor]
-                # If there is a debt, and the neighbor was the loaner, add this neighbor to the infected
-                if our_edge['debt'] != 0 and our_edge['loaner'] == neighbor:
+                # If there is a debt, and the neighbor was the lender, add this neighbor to the infected
+                if our_edge['debt'] != 0 and our_edge['lender'] == neighbor:
                     current_infected.append(neighbor)
                     # Remove the loaned money from the infected neighbor's capital
                     network.node[neighbor]['capital'] -= our_edge['debt']
@@ -169,7 +169,7 @@ def _check_and_propagate_avalanche(network):
             for neighbor in network.neighbors(node):
                 our_edge = network.edge[node][neighbor]
                 # If the infected node loaned money to this neighbor
-                if our_edge['debt'] != 0 and our_edge['loaner'] == node:
+                if our_edge['debt'] != 0 and our_edge['lender'] == node:
                     # recover that money
                     network.node[node]['liquidity'] += our_edge['debt']
                     # Subtract from the neighbor
@@ -200,23 +200,23 @@ HELPER FUNCTIONS
 def __reset_edge(edge):
     edge['debt'] = 0
     edge['borrower'] = None
-    edge['loaner'] = None
+    edge['lender'] = None
 
 ''' Helper function for determining if a given node has a debt. Returns 
     True/False and returns a dict with all nodes who loaned money to the given 
     node, and how much. '''
-def __find_loaners(network, node_name):
+def __find_lenders(network, node_name):
     in_debt = False
-    loaners = {}
+    lenders = {}
     my_edges = network.edges_iter([node_name], data=True)
     for edge in my_edges:
         # Does this edge have a debt where the given node is the borrower?
         debt = edge[2]['debt']
         if debt != 0 and edge[2]['borrower'] == node_name:
-            # Then return true and add the loaner to output
+            # Then return true and add the lender to output
             in_debt = True
-            loaners[edge[2]['loaner']] = edge[2]['debt']
-    return in_debt, loaners
+            lenders[edge[2]['lender']] = edge[2]['debt']
+    return in_debt, lenders
 
 ''' Helper function for determining if a given node has neighbors with negative
     liquidity. Returns True/False, and a dict with the broke neighbors and 
@@ -256,7 +256,7 @@ def _reset_bankrupt_banks(network):
             # Reset the associated edges. NOTE: node[0] is the NAME of this node (in string format)
             for edge in network.edges([node[0]]):
                 network[edge[0]][edge[1]]['debt'] = 0  # network[node1][node2] gives the associated edge. This way of modifying the edge seems contrived and like it could be done easier, but I read that modifying the edge directly is a bad idea here: http://networkx.readthedocs.io/en/networkx-1.11/tutorial/tutorial.html#accessing-edges
-                network[edge[0]][edge[1]]['loaner'] = None
+                network[edge[0]][edge[1]]['lender'] = None
                 network[edge[0]][edge[1]]['borrower'] = None
             # no longer bankrupt
             node[1]['bankrupt'] = False
