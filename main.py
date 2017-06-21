@@ -20,46 +20,12 @@ def print_stuff():
 
 # Build a network corresponding to regular grid with d dimensions of size L, 
 # with liquidity threshold -4 and solvency threshold -6
-network = gn.regular_network(L = 3, d = 2, Tl = -2, Ts = -4)
-
-# Set up test network
-network.node[(0,0)]['liquidity'] = 0
-network.node[(0,0)]['capital'] = -1
-network.node[(1,0)]['liquidity'] = 0
-network.node[(1,0)]['capital'] = 3
-network.node[(1,1)]['liquidity'] = 0
-network.node[(1,1)]['capital'] = -1
-network.node[(2,0)]['liquidity'] = 0
-network.node[(2,0)]['capital'] = -3
-network.node[(2,1)]['liquidity'] = 0
-network.node[(2,1)]['capital'] = 6
-network.node[(2,2)]['liquidity'] = 0
-network.node[(2,2)]['capital'] = -6
-
-network.edge[(0,0)][(1,0)]['debt'] = 1
-network.edge[(0,0)][(1,0)]['borrower'] = (0,0)
-network.edge[(0,0)][(1,0)]['lender'] = (1,0)
-network.edge[(1,0)][(2,0)]['debt'] = 2
-network.edge[(1,0)][(2,0)]['borrower'] = (2,0)
-network.edge[(1,0)][(2,0)]['lender'] = (1,0)
-network.edge[(1,1)][(2,1)]['debt'] = 1
-network.edge[(1,1)][(2,1)]['borrower'] = (1,1)
-network.edge[(1,1)][(2,1)]['lender'] = (2,1)
-network.edge[(2,0)][(2,1)]['debt'] = 3
-network.edge[(2,0)][(2,1)]['borrower'] = (2,0)
-network.edge[(2,0)][(2,1)]['lender'] = (2,1)
-network.edge[(2,2)][(2,1)]['debt'] = 2
-network.edge[(2,2)][(2,1)]['borrower'] = (2,2)
-network.edge[(2,2)][(2,1)]['lender'] = (2,1)
-
-print_stuff()
-
-dn._check_and_propagate_avalanche(network)
-
-print_stuff()
+network = gn.regular_network(L = 100, d = 2, Tl = -2, Ts = -4)
 
 # Run the simulation for 1 iteration
-#dn.run_simulation(network, 1)
+avalanche_sizes = dn.run_simulation(network, 100)
+
+print(avalanche_sizes)
 
 # Draw the graph. NOTE: networkx has some basic drawing functionality but it
 # takes too long for me to draw 100x100
