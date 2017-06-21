@@ -61,11 +61,13 @@ def run_simulation(network, T):
 
 ''' Each bank gets or loses some capital randomly (delta=1 v delta=-1) '''
 def _perturb(network):
-    for node in network.nodes_iter(data=True):  # data=True makes it retrieve all extra attributes
+    print("network:")
+    print(network.nodes())
+    for node in network.nodes_iter():
         # Randomly generate delta    
         delta = random.choice([-1, 1])
         # Update liquidity and capital
-        node[1]['capital'] += delta  # [1] gets the node-associated dictionary with attributes    
+        node.changeCapital(delta)
         node[1]['liquidity'] += delta
 
 ''' Banks with surplus liquidity repay debts  '''

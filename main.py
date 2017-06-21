@@ -15,17 +15,14 @@ import time
 
 # Build a network corresponding to regular grid with d dimensions of size L, 
 # with liquidity threshold -4 and solvency threshold -6
-network = gn.regular_network(L = 30,  d = 3, Tl = -4, Ts = -6)
+network = gn.regular_network(L = 3,  d = 2, Tl = -4, Ts = -6)
 
 # Run the simulation for 100 iteration
-start = time.time()
-avalanche_sizes = dn.run_simulation(network, 100)
-end = time.time()
-print("duration: %f seconds" % (end - start))
+avalanche_sizes = dn.run_simulation(network, 2)
 
 # Plot the distribution of avalanches
 #print(avalanche_sizes)
-an.histogram_avalanches(avalanche_sizes, num_bins = 20, y_scale='symlog', x_scale='symlog')
+#an.histogram_avalanches(avalanche_sizes, num_bins = 20, y_scale='symlog', x_scale='symlog')
 
 # Plot the graph in a circle. NOTE: This only works on small graphs.
 # an.plot_network(network)

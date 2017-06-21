@@ -72,22 +72,22 @@ def trade(banks):
     pass
 
 
-def linkBanks(G, banks):
+def linkBanks(grid, banks):
     """
     Objects of the Bank class are assigned as Nodes
     Also, a adjacency matrix for this network is printed
     """
     
     # Relabelling the nodes to that of the objects of the class Bank
-    mapping = dict(zip(G.nodes(), banks))
-    grid = nx.relabel_nodes(G, mapping)
+    mapping = dict(zip(grid.nodes(), banks))
+    grid = nx.relabel_nodes(grid, mapping)
     # Assigning a position to banks according to the ordering in the network
     i = 0
     for nodes in grid.nodes():
         nodes.setPosition(i)
         i += 1
     # Creating the adjacency matrix
-    print createAdjacencyMatrix(grid)
+    print(createAdjacencyMatrix(grid))
     # Drawing the graph
     bank_positions = [nodes.getPosition() for nodes in grid.nodes()]
     bank_labels = dict(zip(grid.nodes(), bank_positions))
@@ -109,4 +109,4 @@ if __name__ == "__main__" :
 #    createLatticeNetwork(banks, rows, dimension)
     
     for bank in banks:
-        print bank
+        print(bank)
