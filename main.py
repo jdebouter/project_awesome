@@ -18,8 +18,10 @@ import time
 network = gn.regular_network(L = 30,  d = 3, Tl = -4, Ts = -6)
 
 # Run the simulation for 100 iteration
+start = time.time()
 avalanche_sizes = dn.run_simulation(network, 100)
 end = time.time()
+print("duration: %f seconds" % (end - start))
 
 # Plot the distribution of avalanches
 #print(avalanche_sizes)
