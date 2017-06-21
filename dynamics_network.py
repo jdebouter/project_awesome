@@ -28,7 +28,6 @@ for the lattice/regular network they're tuples of integers, eg (0,1)
 
 =========================================================================== """
 
-import networkx as nx
 import random
 
 ''' Run the simulation for T iterations '''
