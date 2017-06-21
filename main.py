@@ -20,10 +20,33 @@ def print_stuff():
 
 # Build a network corresponding to regular grid with d dimensions of size L, 
 # with liquidity threshold -4 and solvency threshold -6
-network = gn.regular_network(L = 5, d = 2, Tl = -4, Ts = -6)
+network = gn.regular_network(L = 3, d = 2, Tl = -2, Ts = -4)
+
+# Set up test network
+network.node[(1,1)]['liquidity'] = 0
+network.node[(1,1)]['capital'] = -1
+network.node[(2,0)]['liquidity'] = 0
+network.node[(2,0)]['capital'] = -3
+network.node[(2,1)]['liquidity'] = 0
+network.node[(2,1)]['capital'] = 6
+network.node[(2,2)]['liquidity'] = 0
+network.node[(2,2)]['capital'] = -6
+
+network.edge[(1,1)][(2,1)]['debt'] = 1
+network.edge[(1,1)][(2,1)]['borrower'] = (1,1)
+network.edge[(1,1)][(2,1)]['loaner'] = (2,1)
+network.edge[(2,0)][(2,1)]['debt'] = 3
+network.edge[(2,0)][(2,1)]['borrower'] = (2,0)
+network.edge[(2,0)][(2,1)]['loaner'] = (2,1)
+network.edge[(2,2)][(2,1)]['debt'] = 2
+network.edge[(2,2)][(2,1)]['borrower'] = (2,2)
+network.edge[(2,2)][(2,1)]['loaner'] = (2,1)
 
 print_stuff()
 
+dn._check_and_propagate_avalanche(network)
+
+print_stuff()
 
 # Run the simulation for 1 iteration
 #dn.run_simulation(network, 1)

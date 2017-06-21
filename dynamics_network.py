@@ -53,7 +53,7 @@ def run_simulation(network, T):
         _invest_surplus_liquidity(network)
         
         # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes
-        _check_and_propagate_avalanche(network, avalanche_sizes)
+        _check_and_propagate_avalanche(network)
                     
     # Return the list of avalanche sizes
     return avalanche_sizes
@@ -145,7 +145,7 @@ def _invest_surplus_liquidity(network):
     avalanche now to distinguish between:
     - avalanche: cascade of failures
     - infection: cascade of banks trying to regain balance by asking money from borrowers '''
-def _check_and_propagate_avalanche(network, avalanche_sizes):
+def _check_and_propagate_avalanche(network):
     # If any bank has gone bankrupt, start an infection. Also get a list of bankrupt banks
     infection_spreading, bankrupt_banks = __find_bankruptcies(network)  # list of bankrupt banks is a list of names
     current_infected = []  # infected is a list of names
