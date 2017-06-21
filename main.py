@@ -23,6 +23,10 @@ def print_stuff():
 network = gn.regular_network(L = 3, d = 2, Tl = -2, Ts = -4)
 
 # Set up test network
+network.node[(0,0)]['liquidity'] = 0
+network.node[(0,0)]['capital'] = -1
+network.node[(1,0)]['liquidity'] = 0
+network.node[(1,0)]['capital'] = 3
 network.node[(1,1)]['liquidity'] = 0
 network.node[(1,1)]['capital'] = -1
 network.node[(2,0)]['liquidity'] = 0
@@ -32,15 +36,21 @@ network.node[(2,1)]['capital'] = 6
 network.node[(2,2)]['liquidity'] = 0
 network.node[(2,2)]['capital'] = -6
 
+network.edge[(0,0)][(1,0)]['debt'] = 1
+network.edge[(0,0)][(1,0)]['borrower'] = (0,0)
+network.edge[(0,0)][(1,0)]['lender'] = (1,0)
+network.edge[(1,0)][(2,0)]['debt'] = 2
+network.edge[(1,0)][(2,0)]['borrower'] = (2,0)
+network.edge[(1,0)][(2,0)]['lender'] = (1,0)
 network.edge[(1,1)][(2,1)]['debt'] = 1
 network.edge[(1,1)][(2,1)]['borrower'] = (1,1)
-network.edge[(1,1)][(2,1)]['loaner'] = (2,1)
+network.edge[(1,1)][(2,1)]['lender'] = (2,1)
 network.edge[(2,0)][(2,1)]['debt'] = 3
 network.edge[(2,0)][(2,1)]['borrower'] = (2,0)
-network.edge[(2,0)][(2,1)]['loaner'] = (2,1)
+network.edge[(2,0)][(2,1)]['lender'] = (2,1)
 network.edge[(2,2)][(2,1)]['debt'] = 2
 network.edge[(2,2)][(2,1)]['borrower'] = (2,2)
-network.edge[(2,2)][(2,1)]['loaner'] = (2,1)
+network.edge[(2,2)][(2,1)]['lender'] = (2,1)
 
 print_stuff()
 
