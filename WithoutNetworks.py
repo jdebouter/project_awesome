@@ -1,39 +1,29 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jun 19 17:45:48 2017
-
-@author: krish
-"""
-
-"""
-Just implementing the whole thing without networks.
-We will colloborate it to the main one on Tuesday 
+Krish's script where he defines the bank object. This script
+should be renamed
 """
 
 import random 
 import networkx as nx
-import matplotlib.pyplot as plt
-
-global SOLVENCY_THRESHOLD, LIQUIDITY_THRESHOLD 
-SOLVENCY_THRESHOLD = -5
-LIQUIDITY_THRESHOLD = -3
 
 # Definition of a Banking Node 
 
 class Bank(object):
     def __init__(self, node, amount_inhand, amount_withothers = []):
-        self.position = node
+        self.label = node
         self.capital = sum(amount_withothers) + amount_inhand
         self.liquidity = amount_inhand
-        self.bankruptancy = False
+        self.bankruptcy = False
         
     def putNeighbours(self, neighbours, amount_withothers):
         self.neighbours = dict(zip(neighbours, amount_withothers))
-        self.areYouInDebt()
+        self.findBorrowersLenders()
         # The neighbours define the edges and the direction of them   
     
-    def getPosition(self):
-        return self.position
+    ''' get methods for accessing attributes '''
+    def getLabel(self):
+        return self.label
     
     def getLiquidity(self):
         return self.liquidity
@@ -47,8 +37,8 @@ class Bank(object):
     def getTotalDebt(self):
         return sum(self.neighbours.values())
     
-    def getBankruptancy(self):
-        return self.bankruptancy
+    def getBankruptcy(self):
+        return self.bankruptcy
     
     def getLenders(self):
         return self.lenders
@@ -58,9 +48,10 @@ class Bank(object):
     
     def getBrokeNeighbours(self):
         return self.brokes
-        
+
+    ''' Set methods for setting attributes '''
     def setBankruptcy(self, value):
-        self.bankruptancy = value
+        self.bankruptcy = value
     
     def setPosition(self, pos):
         self.position = pos
@@ -70,14 +61,7 @@ class Bank(object):
     
     def setCapital(self, chng):
         self.capital += chng
-    
-    def changeLiquidity(self, chng):
-        self.liquidity += chng
-#        self.setCapital(self.getLiquidity() + self.getTotalDebt())
-    
-    def changeDebt(self, neighbour, debt):
-        self.neighbours[neighbour] += debt
-    
+
     def setBorrowers(self, borrowers):
         random.shuffle(borrowers)
         self.borrowers = borrowers      #Borrowers is unsorted 
@@ -89,8 +73,23 @@ class Bank(object):
     def setBrokeNeighbours(self, broke):
         random.shuffle(broke)
         self.brokes = broke
+    
+    ''' Change methods for += type addition '''
+    
+    def changeLiquidity(self, chng):
+        self.liquidity += chng
+#        self.setCapital(self.getLiquidity() + self.getTotalDebt())
+
+    def changeCapital(self, chng):
+        self.capital += chng
+    
+    def changeDebt(self, neighbour, debt):
+        self.neighbours[neighbour] += debt
+
+    ''' find functions go through neighbors and set borrowers/lenders/broke banks
+        to corresponding attributes '''
         
-    def areYouInDebt(self):
+    def findBorrowersLenders(self):
         borrowers = []
         lenders = []
         for neighbour, value in self.neighbours.items():
@@ -108,17 +107,18 @@ class Bank(object):
                 broke.append(neighbour)
         self.setBrokeNeighbours(broke)
     
+    ''' Transfer given amount of money from self to given neighbor'''
     def transfer(self, neighbour, money):  #money is +ve when self to neighbour and -ve when it is neighbour to self
         self.changeLiquidity(-money)
         neighbour.changeLiquidity(money)
         self.changeDebt(neighbour, money)
         neighbour.changeDebt(self, -money)
         
-            
+    ''' For printing a Bank object '''
     def __str__(self):
-        out = "Node %d has %d capital and %d liquidity. " %(self.getPosition(), self.getCapital(), self.getLiquidity())
+        out = "Node %d has %d capital and %d liquidity. " %(self.getLabel(), self.getCapital(), self.getLiquidity())
         for n in self.neighbours:
-            out += " %d debt to node %d. " % (self.neighbours[n], n.getPosition())
+            out += " %d debt to node %d. " % (self.neighbours[n], n.getLabel())
         return out
 
 # Define the banking grid with a unbalanced grid
@@ -166,7 +166,7 @@ def linkBanks(G, banks):
     # Creating the adjacency matrix
 #    print(createAdjacencyMatrix(grid))
     # Drawing the graph
-    bank_positions = [nodes.getPosition() for nodes in grid.nodes()]
+    bank_positions = [nodes.getLabel() for nodes in grid.nodes()]
     bank_labels = dict(zip(grid.nodes(), bank_positions))
 #    nx.draw(grid, labels = bank_labels, with_labels = True)
 #    plt.show()

@@ -68,8 +68,8 @@ def _perturb(network):
         # Randomly generate delta    
         delta = random.choice([-1, 1])
         # Update liquidity and capital
-#        node.changeCapital(delta)  # [1] gets the node-associated dictionary with attributes    
         node.changeLiquidity(delta)
+        node.changeCapital(delta)
 
 ''' Banks with surplus liquidity repay debts  '''
 def _repay_debts(network):
@@ -80,40 +80,40 @@ def _repay_debts(network):
         # Do I have liquidity to repay debt with?
         if node.getLiquidity() > 0:
             # Determine if this node is in debt, and to whom
-            node.setBorrowersLenders()
-            lenders = node.getLenders()  # lenders is a dict with nodes (refs) as keys and loansizes as values
-            if len(lenders) > 0:
-                for lender in lenders:
-                    debt = node.getDebt(lender) # How much money do I owe?
-                    if node.getLiquidity() >= debt:  # Do I have enough money to payback?
-                        node.transfer(lender, debt) # Payback that amount
-                    else:
-                        node.transfer(lender, node.getLiquidity()) # If I can't payback the whole pay, pay how much I have?
-                        break
+            node.findBorrowersLenders()
+            lenders = node.getLenders()
+            # Iterate through all lenders randomly to pay back debt
+            for lender in lenders:
+                debt = node.getDebt(lender)  # How much money do I owe this lender?
+                if node.getLiquidity() >= debt:   # Do I have enough money to repay it all?
+                    node.transfer(lender, debt)  # Repay it all
+                else:
+                    node.transfer(lender, node.getLiquidity())  # Else pay whatever I have
+                    break
 
 ''' Banks with negative liquidity collects loans  '''
 def _collect_loans(network):
+    # Iterate through the node list randomly
     node_list = network.nodes()[:]
     random.shuffle(node_list)
     for node in node_list:
-        # Do I have money?
+        # Do I have a deficit?
         if node.getLiquidity() < 0:
-            # Determine if this node is in debt, and to whom
-            node.areYouInDebt()
-            borrowers = node.borrowers  # List of neighbours who are borrowers
-            if len(borrowers) > 0:
-                # Repay as much as possible to the lender associated with the highest current debt
-                
-                for borrower in borrowers:
-                    debt = node.getDebt(borrower) # How much money do I get?
-                    if abs(node.getLiquidity()) >= debt:  # Is it enough?
-                        node.transfer(borrower, -debt) # Take that amount which is present
-                    else:
-                        node.transfer(borrower, node.getLiquidity()) # Take whatever is needed, surplus covered.
-                        break
+            # Determine if this if anyone owes this node money
+            node.findBorrowersLenders()
+            borrowers = node.borrowers
+            # Iterate through all borrowers randomly to collect loans
+            for borrower in borrowers:
+                debt = node.getDebt(borrower)  # How much money does this borrower have to offer me?
+                if abs(node.getLiquidity()) >= debt:  # If our deficit is bigger than the debt
+                    borrower.transfer(node, debt)  # Take it all back
+                else:
+                    borrower.transfer(node, abs(node.getLiquidity()))  # Else take what is needed to regain balance
+                    break
 
 ''' Banks with surplus liquidity try to invest in neighbors with negative liquidity '''
 def _invest_surplus_liquidity(network):
+    # Iterate through the node list randomly
     node_list = network.nodes()[:]
     random.shuffle(node_list)
     for node in node_list:        
@@ -121,14 +121,14 @@ def _invest_surplus_liquidity(network):
         if node.getLiquidity() > 0:
             node.findBrokeNeighbours()
             broke_neighbours = node.getBrokeNeighbours()
-            if len(broke_neighbours) > 0:
-                for broke in broke_neighbours:
-                    money_needed = -broke.getLiquidity() # How much money do I give?
-                    if node.getLiquidity() >= money_needed:  # Do I have enough money for that?
-                        node.transfer(broke, money_needed) # Transfer that amount
-                    else:
-                        node.transfer(broke, node.getLiquidity()) # Else transfer what I have
-                        break
+            # Iterate through broke neighbors to invest in
+            for broke in broke_neighbours:
+                money_needed = -broke.getLiquidity()  # How much money does this neighbor need?
+                if node.getLiquidity() >= money_needed:  # Do I have enough money for that?
+                    node.transfer(broke, money_needed)  # Transfer that amount
+                else:
+                    node.transfer(broke, node.getLiquidity())  # Else transfer what I have
+                    break
     
 ''' Check for bankrupty and spread infections. Note, I'm calling it 
     avalanche now to distinguish between:
