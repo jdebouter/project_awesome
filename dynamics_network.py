@@ -101,7 +101,7 @@ def _collect_loans(network):
         if node.getLiquidity() < 0:
             # Determine if this node is in debt, and to whom
             node.areYouInDebt()
-            borrowers = node.getBorrowers()  # List of neighbours who are borrowers
+            borrowers = node.borrowers  # List of neighbours who are borrowers
             if len(borrowers) > 0:
                 # Repay as much as possible to the lender associated with the highest current debt
                 

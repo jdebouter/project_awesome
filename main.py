@@ -21,24 +21,24 @@ node1 = network.nodes()[0]
 node2 = network.nodes()[1]
 node3 = network.nodes()[2]
 
-node1.changeDebt(node2, -2)
-node1.changeDebt(node3, -3)
-node1.setCapital(-1)
-node1.setLiquidity(4)
+node1.changeDebt(node2, 2)
+node1.changeDebt(node3, 3)
+node1.setCapital(2)
+node1.setLiquidity(-7)
 
-node2.setCapital(2)
-node2.changeDebt(node1, 2)
+node2.setCapital(-2)
+node2.changeDebt(node1, -2)
 
-node3.setCapital(3)
-node3.changeDebt(node1, 3)
+node3.setCapital(-3)
+node3.changeDebt(node1, -3)
 
-for node in network.nodes_iter():
+for node in network.nodes()[:3]:
     print(node)
 
-dn._repay_debts(network)
+dn._collect_loans(network)
 
 print("\n")
-for node in network.nodes_iter():
+for node in network.nodes()[:3]:
     print(node)
 
 
