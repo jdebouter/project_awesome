@@ -124,8 +124,7 @@ def _invest_surplus_liquidity(network):
             broke_neighbours = node.getBrokeNeighbours()
             if len(broke_neighbours) > 0:
                 for broke in broke_neighbours:
-                           
-                    money_needed = broke.getLiquidity() # How much money do I give?
+                    money_needed = -broke.getLiquidity() # How much money do I give?
                     if node.getLiquidity() >= money_needed:  # Do I have enough money for that?
                         node.transfer(broke, money_needed) # Transfer that amount
                     else:

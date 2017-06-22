@@ -103,7 +103,7 @@ class Bank(object):
     
     def findBrokeNeighbours(self):
         broke = []
-        for neighbour in self.neighbours():
+        for neighbour in self.neighbours:
             if neighbour.getLiquidity() < 0:
                 broke.append(neighbour)
         self.setBrokeNeighbours(broke)
