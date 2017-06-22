@@ -73,17 +73,16 @@ def _perturb(network):
 
 ''' Banks with surplus liquidity repay debts  '''
 def _repay_debts(network):
+    # Iterate through the node list randomly
     node_list = network.nodes()[:]
     random.shuffle(node_list)
     for node in node_list:
-        # Do I have money?
+        # Do I have liquidity to repay debt with?
         if node.getLiquidity() > 0:
             # Determine if this node is in debt, and to whom
-            node.areYouInDebt()
-            lenders = node.getLenders()  # lenders is a dict with names as keys and loansizes as values
+            node.setBorrowersLenders()
+            lenders = node.getLenders()  # lenders is a dict with nodes (refs) as keys and loansizes as values
             if len(lenders) > 0:
-                # Repay as much as possible to the lender associated with the highest current debt
-                
                 for lender in lenders:
                     debt = node.getDebt(lender) # How much money do I owe?
                     if node.getLiquidity() >= debt:  # Do I have enough money to payback?
