@@ -17,15 +17,34 @@ import time
 # with liquidity threshold -4 and solvency threshold -6
 network = gn.regular_network(L = 3,  d = 2, Tl = -4, Ts = -6)
 
-# Run the simulation for 100 iteration
-start = time.time()
-avalanche_sizes = dn.run_simulation(network, 100)
-end = time.time()
-print("duration: %f seconds" % (end - start))
+node1 = network.nodes()[0]
+node2 = network.nodes()[1]
+node3 = network.nodes()[2]
+
+node1.changeDebt(node2, -2)
+node1.changeDebt(node3, -3)
+node1.setCapital(-1)
+node1.setLiquidity(4)
+
+node2.setCapital(2)
+node2.changeDebt(node1, 2)
+
+node3.setCapital(3)
+node3.changeDebt(node1, 3)
+
+for node in network.nodes_iter():
+    print(node)
+
+dn._repay_debts(network)
+
+print("\n")
+for node in network.nodes_iter():
+    print(node)
+
 
 # Plot the distribution of avalanches
 #print(avalanche_sizes)
-an.histogram_avalanches(avalanche_sizes, num_bins = 20, y_scale='symlog', x_scale='symlog')
+#an.histogram_avalanches(avalanche_sizes, num_bins = 20, y_scale='symlog', x_scale='symlog')
 
 # Plot the graph in a circle. NOTE: This only works on small graphs.
 # an.plot_network(network)

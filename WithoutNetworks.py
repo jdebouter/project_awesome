@@ -59,7 +59,7 @@ class Bank(object):
     def getBrokeNeighbours(self):
         return self.brokes
         
-    def setBankruptancy(self, value):
+    def setBankruptcy(self, value):
         self.bankruptancy = value
     
     def setPosition(self, pos):
@@ -73,7 +73,7 @@ class Bank(object):
     
     def changeLiquidity(self, chng):
         self.liquidity += chng
-        self.setCapital(self.getLiquidity() + self.getTotalDebt())
+#        self.setCapital(self.getLiquidity() + self.getTotalDebt())
     
     def changeDebt(self, neighbour, debt):
         self.neighbours[neighbour] += debt
@@ -113,11 +113,12 @@ class Bank(object):
         neighbour.changeLiquidity(money)
         self.changeDebt(neighbour, money)
         neighbour.changeDebt(self, -money)
+        
             
     def __str__(self):
-        out = "Bank %d has %d capital and %d liquidity. " %(self.getPosition(), self.getCapital(), self.getLiquidity())
+        out = "Node %d has %d capital and %d liquidity. " %(self.getPosition(), self.getCapital(), self.getLiquidity())
         for n in self.neighbours:
-            out += " %d debt to neighbor %d. " % (self.neighbours[n], n.getPosition())
+            out += " %d debt to node %d. " % (self.neighbours[n], n.getPosition())
         return out
 
 # Define the banking grid with a unbalanced grid
