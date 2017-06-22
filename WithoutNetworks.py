@@ -56,8 +56,11 @@ class Bank(object):
     def getLenders(self):
         return self.lenders
     
-    def getDebt(self, lender):
-        return abs(self.neighbours[lender])
+    def getDebt(self, neighbour):
+        return abs(self.neighbours[neighbour])
+    
+    def getBrokeNeighbours(self):
+        return self.brokes
         
     def setBankruptancy(self, value):
         self.bankruptancy = value
@@ -86,6 +89,10 @@ class Bank(object):
         random.shuffle(lenders)
         self.lenders = lenders    #Lenders is unsorted
     
+    def setBrokeNeighbours(self, broke):
+        random.shuffle(broke)
+        self.brokes = broke
+        
     def areYouInDebt(self):
         borrowers = []
         lenders = []
@@ -96,13 +103,20 @@ class Bank(object):
                 lenders.append(neighbour)
         self.setBorrowers(borrowers)
         self.setLenders(lenders)
-        
+    
+    def findBrokeNeighbours(self):
+        broke = []
+        for neighbour in self.neighbours():
+            if neighbour.getLiquidity() < 0:
+                broke.append(neighbour)
+        self.setBrokeNeighbours(broke)
+    
     def transfer(self, neighbour, money):  #money is +ve when self to neighbour and -ve when it is neighbour to self
         self.changeLiquidity(-money)
         neighbour.changeLiquidity(money)
-        self.changeDebt(neighbour, debt)
-        neighbour.changeDebt(self, -debt)
-        
+        self.changeDebt(neighbour, money)
+        neighbour.changeDebt(self, -money)
+            
     def __str__(self):
         return "The Bank %d had %d Capital" %(self.getPosition(), self.getCapital())
 
