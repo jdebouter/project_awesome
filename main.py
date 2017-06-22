@@ -15,7 +15,7 @@ import time
 
 # Build a network corresponding to regular grid with d dimensions of size L, 
 # with liquidity threshold -4 and solvency threshold -6
-network = gn.regular_network(L = 30,  d = 3, Tl = -4, Ts = -6)
+network = gn.regular_network(L = 3,  d = 2, Tl = -4, Ts = -6)
 
 # Run the simulation for 100 iteration
 start = time.time()
