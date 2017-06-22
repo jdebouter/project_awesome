@@ -61,36 +61,43 @@ def run_simulation(network, T):
 
 ''' Each bank gets or loses some capital randomly (delta=1 v delta=-1) '''
 def _perturb(network):
-    for node in network.nodes_iter(data=True):  # data=True makes it retrieve all extra attributes
+    for node in network.nodes():  # data=True makes it retrieve all extra attributes
         # Randomly generate delta    
         delta = random.choice([-1, 1])
         # Update liquidity and capital
-        node[1]['capital'] += delta  # [1] gets the node-associated dictionary with attributes    
-        node[1]['liquidity'] += delta
+#        node.changeCapital(delta)  # [1] gets the node-associated dictionary with attributes    
+        node.changeLiquidity(delta)
 
 ''' Banks with surplus liquidity repay debts  '''
 def _repay_debts(network):
-    for node in network.nodes_iter(data=True):
-        if node[1]['liquidity'] > 0:
+    for node in network.nodes():
+        # Do I have money?
+        if node.getLiquidity() > 0:
             # Determine if this node is in debt, and to whom
-            in_debt, lenders = __find_lenders(network, node[0])  # lenders is a dict with names as keys and loansizes as values
-            if in_debt:
+            lenders = node.getLenders()  # lenders is a dict with names as keys and loansizes as values
+            if len(lenders) > 0:
                 # Repay as much as possible to the lender associated with the highest current debt
-                while node[1]['liquidity'] > 0:
-                    max_lender = max(lenders, key=lenders.get)
-                    our_edge = network.edge[node[0]][max_lender]
-                    # If the debt to that lender is more than (or equal to) my liquidity, just give it all
-                    if lenders[max_lender] >= node[1]['liquidity']:
-                        # Add to lenders liquidity
-                        network.node[max_lender]['liquidity'] += node[1]['liquidity']
-                        # Update the associated edge
-                        our_edge['debt'] -= node[1]['liquidity']
-                        if our_edge['debt'] == 0:  # Reset the borrower/lender attributes if the debt is payed now
-                            our_edge['borrower'] = None
-                            our_edge['lender'] = None
-                        # Subtract from my liquidity
-                        node[1]['liquidity'] = 0
-                    # Else pay off the debt and move on to the next lender
+                while node.getLiquidity() > 0:  # As long as I have money
+                    for lender in lenders:
+                        debt = node.getDebt(lender)
+                        if node.getLiquidity() >= debt 
+                            node.transfer(lender, debt)
+                        else:
+                            node.transfer(lender, node.getLiquidity())
+                            break
+                    
+#                    # If the debt to that lender is more than (or equal to) my liquidity, just give it all
+#                    if lenders[max_lender] >= node.getLiquidity():
+#                        # Add to lenders liquidity
+#                        network.node[max_lender]['liquidity'] += node.getLiquidity()
+#                        # Update the associated edge
+#                        our_edge['debt'] -= node[1]['liquidity']
+#                        if our_edge['debt'] == 0:  # Reset the borrower/lender attributes if the debt is payed now
+#                            our_edge['borrower'] = None
+#                            our_edge['lender'] = None
+#                        # Subtract from my liquidity
+#                        node.setLiquidity(0)
+#                    # Else pay off the debt and move on to the next lender
                     else:
                         # Add to lenders liquidity
                         network.node[max_lender]['liquidity'] += our_edge['debt']
@@ -107,18 +114,18 @@ def _repay_debts(network):
 
 ''' Banks with surplus liquidity try to invest in neighbors with negative liquidity '''
 def _invest_surplus_liquidity(network):
-    for node in network.nodes_iter(data=True):        
+    for node in network.nodes():        
         # If there's still liquidity left, help out any broke neighbors
-        if node[1]['liquidity'] > 0:
+        if node.getLiquidity() > 0:
             # Make a list of neighbors with negative liquidity to invest in
-            have_broke_neighbors, broke_neighbors = __find_broke_neighbors(network, node[0])  # NOTE: broke_neighbors is a dict with names as keys and negative liquidities as (negative) values
+            have_broke_neighbors, broke_neighbors = __find_broke_neighbors(network, node.getPosition())  # NOTE: broke_neighbors is a dict with names as keys and negative liquidities as (negative) values
             if have_broke_neighbors:
                 # Invest money in neighbor with least imbalance / highest liquidity
-                while node[1]['liquidity'] > 0:
+                while node.getLiquidity() > 0:
                     least_broke = max(broke_neighbors, key=broke_neighbors.get)
-                    our_edge = network.edge[node[0]][least_broke]
+                    our_edge = network.edge[node.getPosition()][least_broke]
                     # If we don't have enough (or exactly enough) liquidity to restore this neighbor to balance, just give it all
-                    if node[1]['liquidity'] <= -broke_neighbors[least_broke]:
+                    if node.getLiquidity() <= -broke_neighbors[least_broke]:
                         # Add to broke neighbor's liquidity
                         network.node[least_broke]['liquidity'] += node[1]['liquidity']
                         # Update associated edge
@@ -126,7 +133,7 @@ def _invest_surplus_liquidity(network):
                         our_edge['borrower'] = least_broke
                         our_edge['lender'] = node[0]
                         # Subtract from my liquidity
-                        node[1]['liquidity'] = 0
+                        node.setLiquidity(0)
                     # else we have more liquidity than needed to restore this neighbor to balance, so do it and move on
                     else:                        
                         # Subtract from my liquidity
@@ -246,18 +253,18 @@ def __find_broke_neighbors(network, node_name):
 def __find_bankruptcies(network):
     a_bank_is_bankrupt = False
     bankrupt_banks = []
-    for node in network.nodes_iter(data=True):
+    for node in network.nodes():
         # Check whether this node is bankrupt
-        if node[1]['capital'] <= network.graph['Ts'] or node[1]['liquidity'] <= network.graph['Tl']:
-            node[1]['bankrupt'] = True
-            bankrupt_banks.append(node[0])
+        if node.getCapital() <= network.graph['Ts'] or node.getLiquidity <= network.graph['Tl']:
+            node.setBankruptancy(True)
+            bankrupt_banks.append(node.getPosition())
             a_bank_is_bankrupt = True
     return a_bank_is_bankrupt, bankrupt_banks
 
 ''' Helper function for resetting all bankrupt banks '''
 def _reset_bankrupt_banks(network):
-    for node in network.nodes_iter(data=True):  
-        if node[1]['bankrupt']:
+    for node in network.nodes():  
+        if node.getBankruptancy():
             # Reset the capital
             node[1]['capital'] = 0
             node[1]['liquidity'] = 0

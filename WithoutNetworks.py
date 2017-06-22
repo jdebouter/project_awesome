@@ -25,9 +25,11 @@ class Bank(object):
         self.position = node
         self.capital = sum(amount_withothers) + amount_inhand
         self.liquidity = amount_inhand
-            
+        self.bankruptancy = False
+        
     def putNeighbours(self, neighbours, amount_withothers):
         self.neighbours = dict(zip(neighbours, amount_withothers))
+        self.areYouInDebt()
         # The neighbours define the edges and the direction of them   
     
     def getPosition(self):
@@ -43,13 +45,63 @@ class Bank(object):
         return self.neighbours.keys()
     
     def getDebt(self, neighbour):
-        return self.neighbours[neighbours]
+        return self.neighbours[neighbour]
+    
+    def getTotalDebt(self):
+        return sum(self.neighbours.values())
+    
+    def getBankruptancy(self):
+        return self.bankruptancy
+    
+    def getLenders(self):
+        return self.lenders
+    
+    def getDebt(self, lender):
+        return abs(self.neighbours[lender])
+        
+    def setBankruptancy(self, value):
+        self.bankruptancy = value
     
     def setPosition(self, pos):
         self.position = pos
     
-    def changeCapital(self, chng):
+    def setLiquidity(self, liq):
+        self.liquidity = liq
+    
+    def setCapital(self, chng):
         self.capital += chng
+    
+    def changeLiquidity(self, chng):
+        self.liquidity += chng
+        self.setCapital(self.getLiquidity() + self.getTotalDebt())
+    
+    def changeDebt(self, neighbour, debt):
+        self.neighbours[neighbour] += debt
+    
+    def setBorrowers(self, borrowers):
+        random.shuffle(borrowers)
+        self.borrowers = borrowers      #Borrowers is unsorted 
+    
+    def setLenders(self, lenders):
+        random.shuffle(lenders)
+        self.lenders = lenders    #Lenders is unsorted
+    
+    def areYouInDebt(self):
+        borrowers = []
+        lenders = []
+        for neighbour, value in self.neighbours.iteritems():
+            if value > 0:
+                borrowers.append(neighbour)
+            elif value < 0:
+                lenders.append(neighbour)
+        self.setBorrowers(borrowers)
+        self.setLenders(lenders)
+        
+    def transfer(self, neighbour, money):  #money is +ve when self to neighbour and -ve when it is neighbour to self
+        self.changeLiquidity(-money)
+        neighbour.changeLiquidity(money)
+        self.changeDebt(neighbour, debt)
+        neighbour.changeDebt(self, -debt)
         
     def __str__(self):
         return "The Bank %d had %d Capital" %(self.getPosition(), self.getCapital())
@@ -66,8 +118,10 @@ def initializeBanks(tot_banks):
     return banks
 
 # Neighbours are assignmed  
-def assignNeighbours(banks, maximum_neighbours):
-    pass
+def _assignNeighbours(network):
+    for node in network.nodes():
+        node.putNeighbours(network.neighbors(node),[0]*len(network.neighbors(node)))
+        
 
 # Interbanking is initiated
 def startInterbankTrading(banks):
@@ -100,8 +154,14 @@ def linkBanks(G, banks):
     bank_labels = dict(zip(grid.nodes(), bank_positions))
     nx.draw(grid, labels = bank_labels, with_labels = True)
     plt.show()
+    _assignNeighbours(grid)
+    
+    return grid
 
-
+def createNetwork(rows, dimension):
+    return nx.grid_graph([rows for i in range(dimension)], periodic=False)
+    
+    
 def createAdjacencyMatrix(network):
     """
     Returning the adjacency matrix of the network
@@ -113,7 +173,8 @@ if __name__ == "__main__" :
     rows = 3
     dimension = 2
     banks = initializeBanks(rows**dimension)
-#    createLatticeNetwork(banks, rows, dimension)
+    network_map = createNetwork(rows, dimension)
+    network = linkBanks(network_map, banks)
     
     for bank in banks:
         print bank
