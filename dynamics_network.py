@@ -86,7 +86,7 @@ def _repay_debts(network):
                 
                 for lender in lenders:
                     debt = node.getDebt(lender) # How much money do I owe?
-                    if node.getLiquidity() >= debt  # Do I have enough money to payback?
+                    if node.getLiquidity() >= debt:  # Do I have enough money to payback?
                         node.transfer(lender, debt) # Payback that amount
                     else:
                         node.transfer(lender, node.getLiquidity()) # If I can't payback the whole pay, pay how much I have?
@@ -107,7 +107,7 @@ def _collect_loans(network):
                 
                 for borrower in borrowers:
                     debt = node.getDebt(borrower) # How much money do I get?
-                    if abs(node.getLiquidity()) >= debt  # Is it enough?
+                    if abs(node.getLiquidity()) >= debt:  # Is it enough?
                         node.transfer(borrower, -debt) # Take that amount which is present
                     else:
                         node.transfer(borrower, node.getLiquidity()) # Take whatever is needed, surplus covered.
@@ -126,7 +126,7 @@ def _invest_surplus_liquidity(network):
                 for broke in broke_neighbours:
                            
                     money_needed = broke.getLiquidity() # How much money do I give?
-                    if node.getLiquidity() >= money_needed  # Do I have enough money for that?
+                    if node.getLiquidity() >= money_needed:  # Do I have enough money for that?
                         node.transfer(broke, money_needed) # Transfer that amount
                     else:
                         node.transfer(broke, node.getLiquidity()) # Else transfer what I have
@@ -140,6 +140,7 @@ def _check_and_propagate_avalanche(network, avalanche_sizes):
     # If any bank has gone bankrupt, start an infection. Also get a list of bankrupt banks
     bankrupt_banks = __find_bankruptcies(network)  # list of bankrupt banks is a list of names
     for banks in bankrupt_banks:
+        pass
         
         
                                         

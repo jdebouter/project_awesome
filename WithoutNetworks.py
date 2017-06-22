@@ -96,7 +96,7 @@ class Bank(object):
     def areYouInDebt(self):
         borrowers = []
         lenders = []
-        for neighbour, value in self.neighbours.iteritems():
+        for neighbour, value in self.neighbours.items():
             if value > 0:
                 borrowers.append(neighbour)
             elif value < 0:
@@ -162,12 +162,12 @@ def linkBanks(G, banks):
         nodes.setPosition(i)
         i += 1
     # Creating the adjacency matrix
-    print createAdjacencyMatrix(grid)
+#    print(createAdjacencyMatrix(grid))
     # Drawing the graph
     bank_positions = [nodes.getPosition() for nodes in grid.nodes()]
     bank_labels = dict(zip(grid.nodes(), bank_positions))
-    nx.draw(grid, labels = bank_labels, with_labels = True)
-    plt.show()
+#    nx.draw(grid, labels = bank_labels, with_labels = True)
+#    plt.show()
     _assignNeighbours(grid)
     
     return grid
@@ -183,12 +183,12 @@ def createAdjacencyMatrix(network):
     matrix = nx.adjacency_matrix(network)
     return matrix
 
-if __name__ == "__main__" :
-    rows = 3
-    dimension = 2
-    banks = initializeBanks(rows**dimension)
-    network_map = createNetwork(rows, dimension)
-    network = linkBanks(network_map, banks)
-    
-    for bank in banks:
-        print bank
+#if __name__ == "__main__" :
+#    rows = 3
+#    dimension = 2
+#    banks = initializeBanks(rows**dimension)
+#    network_map = createNetwork(rows, dimension)
+#    network = linkBanks(network_map, banks)
+#    
+#    for bank in banks:
+#        print(bank)
