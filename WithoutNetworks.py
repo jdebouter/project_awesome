@@ -44,9 +44,6 @@ class Bank(object):
     def getNeighbours(self):
         return self.neighbours.keys()
     
-    def getDebt(self, neighbour):
-        return self.neighbours[neighbour]
-    
     def getTotalDebt(self):
         return sum(self.neighbours.values())
     
@@ -118,14 +115,18 @@ class Bank(object):
         neighbour.changeDebt(self, -money)
             
     def __str__(self):
-        return "The Bank %d had %d Capital" %(self.getPosition(), self.getCapital())
+        out = "Bank %d has %d capital and %d liquidity. " %(self.getPosition(), self.getCapital(), self.getLiquidity())
+        for n in self.neighbours:
+            out += " %d debt to neighbor %d. " % (self.neighbours[n], n.getPosition())
+        return out
 
 # Define the banking grid with a unbalanced grid
 def initializeBanks(tot_banks):
     banks = []
-    capital = range(-2, 3)
+#    capital = range(-2, 3)
     for i in range(tot_banks):
-        bank = Bank(i, random.choice(capital))
+#        bank = Bank(i, random.choice(capital))
+        bank = Bank(i, 0)
         banks.append(bank)
 #    maximum_neighbours = 4
 #    assignNeighbours(banks, maximum_neighbours)
