@@ -121,7 +121,7 @@ def _check_and_propagate_avalanche(network, avalanche_sizes):
         print("Number of Infected Banks : %d" %(old_infections))
         while len(infected_banks)>0: #When there are infections
             _spread_infections(infected_banks) #Spreads infections
-            bankrupt_banks = _find_bankruptancies(network)  #updates bankruptancies
+            bankrupt_banks = _find_bankruptcies(network)  #updates bankruptancies
             _create_infections(bankrupt_banks)  #Updates infections
             infected_banks = _find_infections(network) #Finds those infections 
             new_infections = len(infected_banks)
@@ -153,7 +153,7 @@ def _find_bankruptcies(network):
     for node in network.nodes():
         # Check whether this node is bankrupt
         if node.getCapital() <= network.graph['Ts'] or node.getLiquidity() <= network.graph['Tl']:
-            node.setBankruptancy(True)
+            node.setBankruptcy(True)
             bankrupt_banks.append(node)
             
     return bankrupt_banks
@@ -161,19 +161,16 @@ def _find_bankruptcies(network):
 '''Helper function for creating infections'''
 def _create_infections(bankrupt_banks):
     for bank in bankrupt_banks:
-        bank.areYouInDebt()
+        bank.findBorrowersLenders()
         lenders = bank.getLenders()
-        if len(lenders) > 0:
-            for lender in lenders:
-                lender.infect()
+        for lender in lenders:
+            lender.infect()
 
 '''Helper function to find infections'''
 def _find_infections(network):
     infected_banks = []
     for bank in network.nodes():
-        if bank.getBankruptancy():
-            pass
-        else:
+        if not bank.getBankruptancy():
             if bank.getInfection():
                 infected_banks.append(bank)
     return infected_banks
