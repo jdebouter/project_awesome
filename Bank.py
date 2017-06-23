@@ -14,7 +14,7 @@ class Bank(object):
         self.label = node
         self.capital = sum(amount_withothers) + amount_inhand
         self.liquidity = amount_inhand
-        self.Bankruptcy = False
+        self.bankruptcy = False
         self.infection = False
 
     ''' GET FUNCTIONS '''
@@ -90,6 +90,7 @@ class Bank(object):
     
     def changeDebt(self, neighbour, debt):
         self.neighbours[neighbour] += debt
+        
 
     ''' find functions don't take arguments. They are called and iterate through
         neighbors to set borrowers/lenders/broke neighbors, and set them internally
@@ -113,9 +114,15 @@ class Bank(object):
         self.setBrokeNeighbours(broke)
         
     ''' MISCELLANEOUS FUNCTIONS '''
-    def infect(self):
+    def infect(self, bank=None):
         self.infection = True
-#    
+        if not bank is None:
+            self.loseMoney(bank)
+        
+    def loseMoney(self, bank):
+        self.changeCapital(-self.getDebt(bank))
+        self.changeDebt(bank, -self.getDebt(bank))
+        
     def reset(self):
         self.Bankruptcy = False
         self.capital = 0
@@ -135,6 +142,7 @@ class Bank(object):
         neighbour.changeLiquidity(money)
         self.changeDebt(neighbour, money)
         neighbour.changeDebt(self, -money)
+        
     
     def __str__(self):
         out = "Node %d has %d capital and %d liquidity. " %(self.getLabel(), self.getCapital(), self.getLiquidity())
