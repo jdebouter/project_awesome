@@ -51,7 +51,7 @@ class Bank(object):
     def getBrokeNeighbours(self):
         return self.brokes
 
-    ''' Set methods for setting attributes '''
+    ''' SET FUNCTIONS '''
     def setBankruptcy(self, value):
         self.bankruptcy = value
     
@@ -80,7 +80,7 @@ class Bank(object):
         random.shuffle(broke)
         self.brokes = broke
         
-    ''' Change methods for += type addition '''
+    ''' CHANGE FUNCTIONS for += type addition '''
     
     def changeLiquidity(self, chng):
         self.liquidity += chng
@@ -91,8 +91,9 @@ class Bank(object):
     def changeDebt(self, neighbour, debt):
         self.neighbours[neighbour] += debt
 
-    ''' find functions go through neighbors and set borrowers/lenders/broke banks
-        to corresponding attributes '''
+    ''' find functions don't take arguments. They are called and iterate through
+        neighbors to set borrowers/lenders/broke neighbors, and set them internally
+        without returning anything '''
     def findBorrowersLenders(self):
         borrowers = []
         lenders = []
@@ -124,7 +125,6 @@ class Bank(object):
     def cure(self):
         self.infection = False
 
-    ''' WRITE DESCRIPTION'''
     def putNeighbours(self, neighbours, amount_withothers):
         self.neighbours = dict(zip(neighbours, amount_withothers))
         self.findBorrowersLenders()
