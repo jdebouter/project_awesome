@@ -15,11 +15,6 @@ class Bank(object):
         self.capital = sum(amount_withothers) + amount_inhand
         self.liquidity = amount_inhand
         self.bankruptcy = False
-        
-    def putNeighbours(self, neighbours, amount_withothers):
-        self.neighbours = dict(zip(neighbours, amount_withothers))
-        self.findBorrowersLenders()
-        # The neighbours define the edges and the direction of them   
     
     ''' get methods for accessing attributes '''
     def getLabel(self):
@@ -73,7 +68,7 @@ class Bank(object):
     def setBrokeNeighbours(self, broke):
         random.shuffle(broke)
         self.brokes = broke
-    
+
     ''' Change methods for += type addition '''
     
     def changeLiquidity(self, chng):
@@ -87,8 +82,9 @@ class Bank(object):
         self.neighbours[neighbour] += debt
 
     ''' find functions go through neighbors and set borrowers/lenders/broke banks
-        to corresponding attributes '''
-        
+        to corresponding attributes. Note: these functions take no arguments and
+        set an objects attributes internally, as opposed to setting some given input'''
+    
     def findBorrowersLenders(self):
         borrowers = []
         lenders = []
@@ -106,7 +102,12 @@ class Bank(object):
             if neighbour.getLiquidity() < 0:
                 broke.append(neighbour)
         self.setBrokeNeighbours(broke)
-    
+
+    ''' WRITE DESCRIPTION'''
+    def putNeighbours(self, neighbours, amount_withothers):
+        self.neighbours = dict(zip(neighbours, amount_withothers))
+        self.findBorrowersLenders()
+
     ''' Transfer given amount of money from self to given neighbor'''
     def transfer(self, neighbour, money):  #money is +ve when self to neighbour and -ve when it is neighbour to self
         self.changeLiquidity(-money)
