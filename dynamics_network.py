@@ -68,11 +68,12 @@ def _perturb(network):
         # Randomly generate delta    
         delta = random.choice([-1, 1])
         # Update liquidity and capital
-#        node.changeCapital(delta)  # [1] gets the node-associated dictionary with attributes    
         node.changeLiquidity(delta)
+        node.changeCapital(delta)
 
 ''' Banks with surplus liquidity repay debts  '''
 def _repay_debts(network):
+    # Iterate through the node list randomly
     node_list = network.nodes()[:]
     random.shuffle(node_list)
     _pay_money(node_list)
@@ -80,6 +81,7 @@ def _repay_debts(network):
 
 ''' Banks with negative liquidity collects loans  '''
 def _collect_loans(network):
+    # Iterate through the node list randomly
     node_list = network.nodes()[:]
     random.shuffle(node_list)
     _get_money(node_list)
@@ -87,6 +89,7 @@ def _collect_loans(network):
 
 ''' Banks with surplus liquidity try to invest in neighbors with negative liquidity '''
 def _invest_surplus_liquidity(network):
+    # Iterate through the node list randomly
     node_list = network.nodes()[:]
     random.shuffle(node_list)
     for node in node_list:        
@@ -94,15 +97,14 @@ def _invest_surplus_liquidity(network):
         if node.getLiquidity() > 0:
             node.findBrokeNeighbours()
             broke_neighbours = node.getBrokeNeighbours()
-            if len(broke_neighbours) > 0:
-                for broke in broke_neighbours:
-                           
-                    money_needed = broke.getLiquidity() # How much money do I give?
-                    if node.getLiquidity() >= money_needed  # Do I have enough money for that?
-                        node.transfer(broke, money_needed) # Transfer that amount
-                    else:
-                        node.transfer(broke, node.getLiquidity()) # Else transfer what I have
-                        break
+            # Iterate through broke neighbors to invest in
+            for broke in broke_neighbours:
+                money_needed = -broke.getLiquidity()  # How much money does this neighbor need?
+                if node.getLiquidity() >= money_needed:  # Do I have enough money for that?
+                    node.transfer(broke, money_needed)  # Transfer that amount
+                else:
+                    node.transfer(broke, node.getLiquidity())  # Else transfer what I have
+                    break
     
 ''' Check for bankrupty and spread infections. Note, I'm calling it 
     avalanche now to distinguish between:
