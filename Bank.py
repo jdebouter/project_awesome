@@ -54,6 +54,7 @@ class Bank(object):
     ''' SET FUNCTIONS '''
     def setBankruptcy(self, value):
         self.bankruptcy = value
+        self.infection = value
     
     def setPosition(self, pos):
         self.position = pos
@@ -125,6 +126,7 @@ class Bank(object):
         
     def reset(self):
         self.Bankruptcy = False
+        self.infection = False
         self.capital = 0
         self.liquidity = 0
         self.setNoDebt()

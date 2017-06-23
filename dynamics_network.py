@@ -129,6 +129,7 @@ def _check_and_propagate_avalanche(network, avalanche_sizes):
                 print('New Bankruptcies : %d' %(len(bankrupt_banks)))
                 print('New Infections : %d' %(new_infections))
                 if new_infections == old_infections: # When there is no new infection, we stop the avalance
+                    avalanche_sizes.append(new_infections)
                     _cure(infected_banks) # Cures infected banks
                     final_bankruptancy = len(bankrupt_banks)
                     if final_bankruptancy == len(network.nodes()):  # Checks if all banks are bankrupt
@@ -174,9 +175,8 @@ def _infect_neighbours(bankrupt_banks):
 def _find_infections(network):
     infected_banks = []
     for bank in network.nodes():
-        if not bank.getBankruptcy():
-            if bank.getInfection():
-                infected_banks.append(bank)
+        if bank.getInfection():
+            infected_banks.append(bank)
     return infected_banks
 
 '''Helper function to cure infections'''
