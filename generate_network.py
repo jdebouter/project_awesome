@@ -8,7 +8,7 @@ This script is where we define the functions for generating the network.
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
-import WithoutNetworks as kk
+import Bank as kk
 
 ''' Generate and return a network that corresponds to a regular lattice
     with dimension d and dimensions with size L.

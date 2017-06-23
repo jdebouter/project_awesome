@@ -17,8 +17,6 @@ import time
 # with liquidity threshold -4 and solvency threshold -6
 network = gn.regular_network(L = 3,  d = 2, Tl = -4, Ts = -6)
 
-dn.run_simulation(network, 1)
-
 # Plot the distribution of avalanches
 #print(avalanche_sizes)
 #an.histogram_avalanches(avalanche_sizes, num_bins = 20, y_scale='symlog', x_scale='symlog')
