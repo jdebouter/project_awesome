@@ -26,12 +26,16 @@ class Bank(object):
         self.capital = sum(amount_withothers) + amount_inhand
         self.liquidity = amount_inhand
         self.bankruptancy = False
+        self.infection = False
         
     def putNeighbours(self, neighbours, amount_withothers):
         self.neighbours = dict(zip(neighbours, amount_withothers))
         self.areYouInDebt()
         # The neighbours define the edges and the direction of them   
     
+    def getInfection(self):
+        return self.infection
+            
     def getPosition(self):
         return self.position
     
@@ -43,9 +47,6 @@ class Bank(object):
     
     def getNeighbours(self):
         return self.neighbours.keys()
-    
-    def getDebt(self, neighbour):
-        return self.neighbours[neighbour]
     
     def getTotalDebt(self):
         return sum(self.neighbours.values())
@@ -89,17 +90,33 @@ class Bank(object):
         random.shuffle(lenders)
         self.lenders = lenders    #Lenders is unsorted
     
+    def setNoDebt(self):
+        for neighbour in self.neighbours:
+            self.neighbours[neighbour] = 0 
+    
     def setBrokeNeighbours(self, broke):
         random.shuffle(broke)
         self.brokes = broke
         
+    def infect(self):
+        self.infection = True
+#    
+    def reset(self):
+        self.bankruptancy = False
+        self.capital = 0
+        self.liquidity = 0
+        self.setNoDebt()
+    
+    def cure(self):
+        self.infection = False
+    
     def areYouInDebt(self):
         borrowers = []
         lenders = []
         for neighbour, value in self.neighbours.iteritems():
-            if value > 0:
+            if value > 0 and (neighbour.getBankruptancy() is False):# and neighbour.getInfection() is False):
                 borrowers.append(neighbour)
-            elif value < 0:
+            elif value < 0 and (neighbour.getBankruptancy() is False):# and neighbour.getInfection() is False):
                 lenders.append(neighbour)
         self.setBorrowers(borrowers)
         self.setLenders(lenders)
@@ -107,7 +124,7 @@ class Bank(object):
     def findBrokeNeighbours(self):
         broke = []
         for neighbour in self.neighbours():
-            if neighbour.getLiquidity() < 0:
+            if neighbour.getLiquidity() < 0 and neighbour.getBankruptancy is not True:
                 broke.append(neighbour)
         self.setBrokeNeighbours(broke)
     
@@ -116,7 +133,7 @@ class Bank(object):
         neighbour.changeLiquidity(money)
         self.changeDebt(neighbour, money)
         neighbour.changeDebt(self, -money)
-            
+    
     def __str__(self):
         return "The Bank %d had %d Capital" %(self.getPosition(), self.getCapital())
 
