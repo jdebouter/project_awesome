@@ -43,6 +43,9 @@ class Bank(object):
     def getBankruptcy(self):
         return self.bankruptcy
     
+    def getBorrowers(self):
+        return self.borrowers
+    
     def getLenders(self):
         return self.lenders
     
