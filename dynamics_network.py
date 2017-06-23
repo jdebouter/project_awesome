@@ -196,7 +196,7 @@ def _get_money(node_list, cure = 0):
                 
                 for borrower in borrowers:
                     debt = node.getDebt(borrower) # How much money do I get?
-                    if abs(node.getLiquidity()) >= debt  # Is it enough?
+                    if abs(node.getLiquidity()) >= debt:  # Is it enough?
                         node.transfer(borrower, -debt) # Take that amount which is present
                         if cure:
                             borrower.infect()
@@ -220,7 +220,7 @@ def _pay_money(node_list, cure=0):
                 
                 for lender in lenders:
                     debt = node.getDebt(lender) # How much money do I owe?
-                    if node.getLiquidity() >= debt  # Do I have enough money to payback?
+                    if node.getLiquidity() >= debt:  # Do I have enough money to payback?
                         node.transfer(lender, debt) # Payback that amount
                         if cure:
                             lender.infect()

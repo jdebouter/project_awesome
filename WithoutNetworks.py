@@ -14,7 +14,7 @@ class Bank(object):
         self.label = node
         self.capital = sum(amount_withothers) + amount_inhand
         self.liquidity = amount_inhand
-        self.bankruptancy = False
+        self.Bankruptcy = False
         self.infection = False
         
     def putNeighbours(self, neighbours, amount_withothers):
@@ -25,8 +25,8 @@ class Bank(object):
     def getInfection(self):
         return self.infection
             
-    def getPosition(self):
-        return self.position
+    def getLabel(self):
+        return self.label
     
     def getLiquidity(self):
         return self.liquidity
@@ -81,11 +81,15 @@ class Bank(object):
         random.shuffle(broke)
         self.brokes = broke
         
+    def changeLiquidity(self, chng): 
+        self.liquidity += chng 
+#        self.setCapital(self.getLiquidity() + self.getTotalDebt()) 
+        
     def infect(self):
         self.infection = True
 #    
     def reset(self):
-        self.bankruptancy = False
+        self.Bankruptcy = False
         self.capital = 0
         self.liquidity = 0
         self.setNoDebt()
@@ -93,21 +97,21 @@ class Bank(object):
     def cure(self):
         self.infection = False
     
-    def areYouInDebt(self):
+    def findBorrowersLenders(self):
         borrowers = []
         lenders = []
-        for neighbour, value in self.neighbours.iteritems():
-            if value > 0 and (neighbour.getBankruptancy() is False):# and neighbour.getInfection() is False):
+        for neighbour, value in self.neighbours.items():
+            if value > 0 and (neighbour.getBankruptcy() is False):# and neighbour.getInfection() is False):
                 borrowers.append(neighbour)
-            elif value < 0 and (neighbour.getBankruptancy() is False):# and neighbour.getInfection() is False):
+            elif value < 0 and (neighbour.getBankruptcy() is False):# and neighbour.getInfection() is False):
                 lenders.append(neighbour)
         self.setBorrowers(borrowers)
         self.setLenders(lenders)
     
     def findBrokeNeighbours(self):
         broke = []
-        for neighbour in self.neighbours():
-            if neighbour.getLiquidity() < 0 and neighbour.getBankruptancy is not True:
+        for neighbour in self.neighbours:
+            if neighbour.getLiquidity() < 0 and neighbour.getBankruptcy is not True:
                 broke.append(neighbour)
         self.setBrokeNeighbours(broke)
 
