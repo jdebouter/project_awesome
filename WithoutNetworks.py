@@ -121,22 +121,9 @@ class Bank(object):
             out += " %d debt to node %d. " % (self.neighbours[n], n.getLabel())
         return out
 
-# Define the banking grid with a unbalanced grid
-def initializeBanks(tot_banks):
-    banks = []
-#    capital = range(-2, 3)
-    for i in range(tot_banks):
-#        bank = Bank(i, random.choice(capital))
-        bank = Bank(i, 0)
-        banks.append(bank)
-#    maximum_neighbours = 4
-#    assignNeighbours(banks, maximum_neighbours)
-    return banks
 
-# Neighbours are assignmed  
-def _assignNeighbours(network):
-    for node in network.nodes():
-        node.putNeighbours(network.neighbors(node),[0]*len(network.neighbors(node)))
+
+
         
 
 # Interbanking is initiated
@@ -149,30 +136,6 @@ def trade(banks):
     pass
 
 
-def linkBanks(G, banks):
-    """
-    Objects of the Bank class are assigned as Nodes
-    Also, a adjacency matrix for this network is printed
-    """
-    
-    # Relabelling the nodes to that of the objects of the class Bank
-    mapping = dict(zip(G.nodes(), banks))
-    grid = nx.relabel_nodes(G, mapping)
-    # Assigning a position to banks according to the ordering in the network
-    i = 0
-    for nodes in grid.nodes():
-        nodes.setPosition(i)
-        i += 1
-    # Creating the adjacency matrix
-#    print(createAdjacencyMatrix(grid))
-    # Drawing the graph
-    bank_positions = [nodes.getLabel() for nodes in grid.nodes()]
-    bank_labels = dict(zip(grid.nodes(), bank_positions))
-#    nx.draw(grid, labels = bank_labels, with_labels = True)
-#    plt.show()
-    _assignNeighbours(grid)
-    
-    return grid
 
 def createNetwork(rows, dimension):
     return nx.grid_graph([rows for i in range(dimension)], periodic=False)

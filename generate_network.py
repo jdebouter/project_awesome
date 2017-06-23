@@ -14,18 +14,16 @@ import WithoutNetworks as kk
     with dimension d and dimensions with size L.
     Tl is the liquidity threshold and Ts the solvency threshold. '''
 def regular_network(L, d, Tl, Ts):
-    # Build the graph
+    # Build the graph, ie get the topology
     G = nx.grid_graph([L for i in range(d)], periodic=False)
-    # Add the extra attributes we need
-    FG = _addBanks(G, Tl, Ts)
-    return FG
+    # Topology is done, but now replace the nodes (just tuples) with Bank objects
+    return _replaceNodesWithBankObjects(G, Tl, Ts)
 
 ''' Generate and return a random network of size N with link probability p.
     Tl is the liquidity threshold and Ts the solvency threshold. '''
 def random_network(N, p, Tl, Ts):
     G = nx.erdos_renyi_graph(N, p)
-    FG = _addBanks(G, Tl, Ts)
-    return FG
+    return _replaceNodesWithBankObjects(G, Tl, Ts)
 
 ''' Generate and return a scale-free network of size N and with m the number 
     of edges that are added to new nodes each iteration during growth of the 
@@ -33,8 +31,7 @@ def random_network(N, p, Tl, Ts):
     Tl is the liquidity threshold and Ts the solvency threshold. '''
 def barabasi_albert_network(N, m, Tl, Ts):
     G = nx.barabasi_albert_graph(N, m)
-    FG = _addBanks(G, Tl, Ts)
-    return FG
+    return _replaceNodesWithBankObjects(G, Tl, Ts)
 
 ''' Generate and return a scale-free network of size N using the mean field
     algorithm. 
@@ -48,32 +45,61 @@ def barabasi_albert_network(N, m, Tl, Ts):
     '''
 def mean_field_network(N, Tl, Ts, c = 1, m = 0.52):
     G = _mean_field_graph(N, Tl, Ts, c, m)
-    FG = _addBanks(G, Tl, Ts)
-    return FG
+    return _replaceNodesWithBankObjects(G, Tl, Ts)
 
 
 ''' Add all of the attributes like banking capital theta and thresholds to the
     graph, nodes and dges '''
     
-def createBanks(L, d):
-    banks = kk.initializeBanks(L**d)
-    return banks
-    
-def _addBanks(G, Tl, Ts):
-    banks = kk.initializeBanks(G.number_of_nodes())
+def _replaceNodesWithBankObjects(G, Tl, Ts):
+    banks = initializeBanks(G.number_of_nodes())
     # Add the liquidity threshold and solvency threshold
     G.graph['Tl'] = Tl
     G.graph['Ts'] = Ts
-#    # Add banking capital attribute and bankruptcy attributes to all nodes (initialize at 0 and False)
-#    nx.set_node_attributes(G, 'capital', 0)
-#    nx.set_node_attributes(G, 'liquidity', 0)
-#    nx.set_node_attributes(G, 'bankrupt', False)
-#    # Add a debt attribute to every edge (and attributes describing to whom the debt is owed)
-#    nx.set_edge_attributes(G, 'debt', 0)
-#    nx.set_edge_attributes(G, 'lender', None)
-#    nx.set_edge_attributes(G, 'borrower', None)
-    # Replacing nodes using banks list for each network 
-    return kk.linkBanks(G, banks)
+    return linkBanks(G, banks)
+
+# Define the banking grid with a unbalanced grid
+def initializeBanks(tot_banks):
+    banks = []
+#    capital = range(-2, 3)
+    for i in range(tot_banks):
+#        bank = Bank(i, random.choice(capital))
+        bank = kk.Bank(i, 0)
+        banks.append(bank)
+#    maximum_neighbours = 4
+#    assignNeighbours(banks, maximum_neighbours)
+    return banks
+
+
+def linkBanks(G, banks):
+    """
+    Objects of the Bank class are assigned as Nodes
+    Also, a adjacency matrix for this network is printed
+    """
+    
+    # Relabelling the nodes to that of the objects of the class Bank
+    mapping = dict(zip(G.nodes(), banks))
+    grid = nx.relabel_nodes(G, mapping)
+    # Assigning a position to banks according to the ordering in the network
+    i = 0
+    for nodes in grid.nodes():
+        nodes.setPosition(i)
+        i += 1
+    # Creating the adjacency matrix
+#    print(createAdjacencyMatrix(grid))
+    # Drawing the graph
+    bank_positions = [nodes.getLabel() for nodes in grid.nodes()]
+    bank_labels = dict(zip(grid.nodes(), bank_positions))
+#    nx.draw(grid, labels = bank_labels, with_labels = True)
+#    plt.show()
+    _assignNeighbours(grid)
+    
+    return grid
+
+# Neighbours are assignmed  
+def _assignNeighbours(network):
+    for node in network.nodes():
+        node.putNeighbours(network.neighbors(node),[0]*len(network.neighbors(node)))
 
 """ ===========================================================================
 
