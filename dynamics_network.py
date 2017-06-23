@@ -183,29 +183,27 @@ def _spread_infections(infected_banks):
     _get_money(infected_banks, cure = 1)
     _pay_money(infected_banks, cure = 1)
 
-'''Helper function to get money'''
+''' Helper function to get money '''
 def _get_money(node_list, cure = 0):
     for node in node_list:
         # Do I have money?
         if node.getLiquidity() < 0:
             # Determine if this node is in debt, and to whom
-            node.areYouInDebt()
+            node.findBorrowersLenders()
             borrowers = node.getBorrowers()  # List of neighbours who are borrowers
-            if len(borrowers) > 0:
-                # Repay as much as possible to the lender associated with the highest current debt
-                
-                for borrower in borrowers:
-                    debt = node.getDebt(borrower) # How much money do I get?
-                    if abs(node.getLiquidity()) >= debt:  # Is it enough?
-                        node.transfer(borrower, -debt) # Take that amount which is present
-                        if cure:
-                            borrower.infect()
-                    else:
-                        node.transfer(borrower, node.getLiquidity()) # Take whatever is needed, surplus covered.
-                        if cure:
-                            borrower.infect()
+            # Repay as much as possible to the lender associated with the highest current debt
+            for borrower in borrowers:
+                debt = node.getDebt(borrower) # How much money do I get?
+                if abs(node.getLiquidity()) >= debt:  # Is it enough?
+                    node.transfer(borrower, -debt) # Take that amount which is present
+                    if cure:
+                        borrower.infect()
+                else:
+                    node.transfer(borrower, node.getLiquidity()) # Take whatever is needed, surplus covered.
+                    if cure:
+                        borrower.infect()
 #                            node.cure()
-                        break
+                    break
 
 '''Helper function to pay money'''
 def _pay_money(node_list, cure=0):
@@ -213,7 +211,7 @@ def _pay_money(node_list, cure=0):
         # Do I have money?
         if node.getLiquidity() > 0:
             # Determine if this node is in debt, and to whom
-            node.areYouInDebt()
+            node.findBorrowersLenders()
             lenders = node.getLenders()  # lenders is a dict with names as keys and loansizes as values
             if len(lenders) > 0:
                 # Repay as much as possible to the lender associated with the highest current debt
