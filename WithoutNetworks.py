@@ -16,12 +16,8 @@ class Bank(object):
         self.liquidity = amount_inhand
         self.Bankruptcy = False
         self.infection = False
-        
-    def putNeighbours(self, neighbours, amount_withothers):
-        self.neighbours = dict(zip(neighbours, amount_withothers))
-        self.areYouInDebt()
-        # The neighbours define the edges and the direction of them   
-    
+
+    ''' GET FUNCTIONS '''
     def getInfection(self):
         return self.infection
             
@@ -84,22 +80,19 @@ class Bank(object):
         random.shuffle(broke)
         self.brokes = broke
         
-    def changeLiquidity(self, chng): 
-        self.liquidity += chng 
-#        self.setCapital(self.getLiquidity() + self.getTotalDebt()) 
-        
-    def infect(self):
-        self.infection = True
-#    
-    def reset(self):
-        self.Bankruptcy = False
-        self.capital = 0
-        self.liquidity = 0
-        self.setNoDebt()
+    ''' Change methods for += type addition '''
     
-    def cure(self):
-        self.infection = False
+    def changeLiquidity(self, chng):
+        self.liquidity += chng
+
+    def changeCapital(self, chng):
+        self.capital += chng
     
+    def changeDebt(self, neighbour, debt):
+        self.neighbours[neighbour] += debt
+
+    ''' find functions go through neighbors and set borrowers/lenders/broke banks
+        to corresponding attributes '''
     def findBorrowersLenders(self):
         borrowers = []
         lenders = []
@@ -117,6 +110,19 @@ class Bank(object):
             if neighbour.getLiquidity() < 0 and neighbour.getBankruptcy is not True:
                 broke.append(neighbour)
         self.setBrokeNeighbours(broke)
+        
+    ''' MISCELLANEOUS FUNCTIONS '''
+    def infect(self):
+        self.infection = True
+#    
+    def reset(self):
+        self.Bankruptcy = False
+        self.capital = 0
+        self.liquidity = 0
+        self.setNoDebt()
+    
+    def cure(self):
+        self.infection = False
 
     ''' WRITE DESCRIPTION'''
     def putNeighbours(self, neighbours, amount_withothers):
@@ -136,26 +142,6 @@ class Bank(object):
             out += " %d debt to node %d. " % (self.neighbours[n], n.getLabel())
         return out
 
-
-
-
-        
-
-# Interbanking is initiated
-def startInterbankTrading(banks):
-    while True:
-        trade(banks)
-
-# Trade Implementation
-def trade(banks):
-    pass
-
-
-
-def createNetwork(rows, dimension):
-    return nx.grid_graph([rows for i in range(dimension)], periodic=False)
-    
-    
 def createAdjacencyMatrix(network):
     """
     Returning the adjacency matrix of the network
