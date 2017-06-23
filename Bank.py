@@ -14,7 +14,7 @@ class Bank(object):
         self.label = node
         self.capital = sum(amount_withothers) + amount_inhand
         self.liquidity = amount_inhand
-        self.Bankruptcy = False
+        self.bankruptcy = False
         self.infection = False
 
     ''' GET FUNCTIONS '''
