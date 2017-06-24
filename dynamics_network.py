@@ -111,7 +111,7 @@ def _collect_loans(network):
     # Iterate through the node list randomly
     node_list = network.nodes()[:]
     random.shuffle(node_list)
-    _get_money(node_list, 0)
+    _get_money(node_list)
 
 
 ''' Banks with surplus liquidity try to invest in neighbors with negative liquidity '''
