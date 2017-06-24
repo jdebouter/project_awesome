@@ -110,7 +110,7 @@ class Bank(object):
     def updateBrokeNeighbours(self):
         broke = []
         for neighbour in self.neighbours:
-            if neighbour.getBankruptcy() is not True and neighbour.getCapital() < 0 and neighbour.getTotalDebt() < 0:
+            if neighbour.getBankruptcy() is not True and neighbour.getCapital() < 0: # and neighbour.getTotalDebt() < 0:
                 broke.append(neighbour) 
         self.setBrokeNeighbours(broke)
         

@@ -16,12 +16,12 @@ import time
 network = gn.regular_network(L = 100,  d = 2, Tl = -4, Ts = -6)
 #
 avalanches = []
-for i in range(30):
+for i in range(10):
     print(i)
     avalanche_sizes = dn.run_simulation(network, 1000)
     for ava in avalanche_sizes:
         avalanches.append(ava)
     
-avalanches.append()
+
 ## Plot the distribution of avalanches
 an.histogram_avalanches(avalanches, num_bins = len(avalanches), y_scale='log', x_scale='linear')
