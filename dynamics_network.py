@@ -19,29 +19,16 @@ def run_simulation(network, T):
         
         # Banks with surplus liquidity try to repay debts
         repay_debts(network)
-        print('debt1')
-        debug(network)
-        print('debt1')
  
-
         # Banks with a deficit try to collect loans back
         collect_loans(network)
-        print('loan1')
-        debug(network)
-        print('loan1')
  
-
          # Banks with surplus liquidity try to invest in neighbors with negative liquidity
         invest_surplus_liquidity(network)
-        print('invest1')
-        debug(network)
-        print('invest2') 
 
         # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes
         check_and_propagate_avalanche(network, avalanche_sizes)
-        print('ava1')
         debug(network)
-        print('ava2')
 
     # Return the list of avalanche sizes
     return avalanche_sizes
