@@ -9,15 +9,14 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 
+''' Print the capital, liquidity and loans/debts for every node '''
 def print_network(network):
-    print('\n\n\n')
-    for node in network.nodes_iter(data=True):
+    for node in network.nodes():
         print(node)
-    print()
-    for edge in network.edges_iter(data=True):
-        print(edge)
+    print('\n')
 
-def histogram_avalanches(avalanche_sizes, num_bins = 50, y_scale = 'log', x_scale = 'linear'):
+''' Plot a histogram of the avalanche sizes '''
+def histogram_avalanches(avalanche_sizes, num_bins = 50, y_scale = 'log', x_scale = 'log'):
     results_histogram = np.histogram(avalanche_sizes, bins=num_bins)
     plt.plot(np.linspace(0, max(avalanche_sizes), num_bins), results_histogram[0], '*')
     plt.yscale(y_scale)

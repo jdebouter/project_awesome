@@ -85,13 +85,8 @@ def linkBanks(G, banks):
     for nodes in grid.nodes():
         nodes.setPosition(i)
         i += 1
-    # Creating the adjacency matrix
-#    print(createAdjacencyMatrix(grid))
-    # Drawing the graph
     bank_oldLabels = [nodes.getLabel() for nodes in grid.nodes()]
     bank_labels = dict(zip(grid.nodes(), bank_oldLabels))
-#    nx.draw(grid, labels = bank_labels, with_labels = True)
-#    plt.show()
     _assignNeighbours(grid)
     
     return grid

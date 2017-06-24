@@ -83,7 +83,6 @@ class Bank(object):
         self.brokes = broke
         
     ''' CHANGE FUNCTIONS for += type addition '''
-    
     def changeLiquidity(self, chng):
         self.liquidity += chng
 
@@ -94,10 +93,10 @@ class Bank(object):
         self.neighbours[neighbour] += debt
         
 
-    ''' find functions don't take arguments. They are called and iterate through
+    ''' Update functions don't take arguments. They are called and iterate through
         neighbors to set borrowers/lenders/broke neighbors, and set them internally
         without returning anything '''
-    def findBorrowersLenders(self):
+    def updateBorrowersLenders(self):
         borrowers = []
         lenders = []
         for neighbour, value in self.neighbours.items():
@@ -108,7 +107,7 @@ class Bank(object):
         self.setBorrowers(borrowers)
         self.setLenders(lenders)
     
-    def findBrokeNeighbours(self):
+    def updateBrokeNeighbours(self):
         broke = []
         for neighbour in self.neighbours:
             if neighbour.getBankruptcy() is not True and neighbour.getCapital() < 0 and neighbour.getTotalDebt() < 0:
@@ -116,40 +115,49 @@ class Bank(object):
         self.setBrokeNeighbours(broke)
         
     ''' MISCELLANEOUS FUNCTIONS '''
-    def infect(self, bank=None):
+    
+    ''' Transfer given amount of money from self to given neighbor, and update debt '''
+    def transfer(self, neighbour, money):  #money is +ve when self to neighbour and -ve when it is neighbour to self
+        self.changeLiquidity(-money)
+        neighbour.changeLiquidity(money)
+        self.changeDebt(neighbour, money)
+        neighbour.changeDebt(self, -money)
+
+    ''' This function is for network generation only.  '''
+    def putNeighbours(self, neighbours, amount_withothers):
+        self.neighbours = dict(zip(neighbours, amount_withothers))
+        self.updateBorrowersLenders()
+
+    ''' Set infection to false '''
+    def cure(self):
+        self.infection = False
+
+    ''' Set infection to true. This function is called for all neighbors of a bankrupt bank,
+        so '''
+    def infect(self, bank = None):
         self.infection = True
-        if not bank is None:
+        if not bank is None:  # this function is called for all neighbors of 
             self.loseMoney(bank)
-        
+
+    ''' ??? Where is this used? Why? '''
     def loseMoney(self, bank):
         self.changeCapital(-self.getDebt(bank))
         self.changeDebt(bank, -self.getDebt(bank))
-        
+
+    ''' Reset all attributes of a bank (used after bankruptcy avalanche is over) '''
     def reset(self):
         self.Bankruptcy = False
         self.infection = False
         self.capital = 0
         self.liquidity = 0
         self.setNoDebt()
-    
-    def cure(self):
-        self.infection = False
 
-    def putNeighbours(self, neighbours, amount_withothers):
-        self.neighbours = dict(zip(neighbours, amount_withothers))
-        self.findBorrowersLenders()
-
-    ''' Transfer given amount of money from self to given neighbor'''
-    def transfer(self, neighbour, money):  #money is +ve when self to neighbour and -ve when it is neighbour to self
-        self.changeLiquidity(-money)
-        neighbour.changeLiquidity(money)
-        self.changeDebt(neighbour, money)
-        neighbour.changeDebt(self, -money)
-        
+    ''' Debugging function I think. Used to check if the capital still equals the liquidity + loans/debts. '''
     def isCapitalRight(self):
         if not self.getCapital() == self.getTotalDebt() + self.getLiquidity():
-            print True
+            raise Exception("Capital isn't right!")
             
+    ''' This gets invoked when doing print(node). Print usefull stuff instead of node reference memory address '''
     def __str__(self):
         out = "Node %d has %d capital and %d liquidity. " %(self.getLabel(), self.getCapital(), self.getLiquidity())
         for n in self.neighbours:
