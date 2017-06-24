@@ -19,25 +19,13 @@ def run_simulation(network, T):
         
         # Banks with surplus liquidity try to repay debts
         _repay_debts(network)
-        print 'debt1'
-        debug(network)
-        print 'debt2'
-         # Banks with surplus liquidity try to invest in neighbors with negative liquidity
+        # Banks with surplus liquidity try to invest in neighbors with negative liquidity
         _invest_surplus_liquidity(network)
-        print 'invest1'
-        debug(network)
-        print 'invest2'
-
         # Banks without surplus can collect money back
         _collect_loans(network)
-        print 'loan1'
-        debug(network)
-        print 'loan2'
         # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes
         _check_and_propagate_avalanche(network, avalanche_sizes)
-        print 'ava1'
-        debug(network)
-        print 'ava2'            
+                    
     # Return the list of avalanche sizes
     return avalanche_sizes
 
@@ -73,8 +61,10 @@ def _invest_surplus_liquidity(network):
     random.shuffle(node_list)
     for node in node_list:        
         # If there's still liquidity left, help out any broke neighbors
-        if node.getCapital() > 0:
-                        
+        if node.getTotalDebt() > 0 and node.getLiquidity() > 0:
+#            node.findBorrowersLenders()
+            
+            
             node.findBrokeNeighbours()
             broke_neighbours = node.getBrokeNeighbours()
             # Iterate through broke neighbors to invest in
@@ -94,7 +84,7 @@ def _invest_surplus_liquidity(network):
     avalanche now to distinguish between:
     - avalanche: cascade of failures
     - infection: cascade of banks trying to regain balance by asking money from borrowers '''
-def _check_and_propagate_avalanche(network, avalanche_sizes, t):
+def _check_and_propagate_avalanche(network, avalanche_sizes):
     # If any bank has gone bankrupt, start an infection. Also get a list of bankrupt banks
     
     bankrupt_banks = _find_bankruptcies(network)  # list of bankrupt banks is a list of names
@@ -178,7 +168,7 @@ def _spread_infections(infected_banks):
 def _get_money(node_list, cure = 0):
     for node in node_list:
         # Do I have money?
-        if (node.getLiquidity() < 0 and node.getCapital() > 0) or cure:
+        if node.getLiquidity() < 0 or cure:
             # Determine if this node is in debt, and to whom
             node.findBorrowersLenders()
             borrowers = node.getBorrowers()  # List of neighbours who are borrowers
@@ -200,7 +190,7 @@ def _get_money(node_list, cure = 0):
 def _pay_money(node_list, cure=0):
     for node in node_list:
         # Do I have money?
-        if (node.getLiquidity() > 0 and node.getCapital() < 0) or cure:
+        if node.getLiquidity() > 0 or cure:
             # Determine if this node is in debt, and to whom
             node.findBorrowersLenders()
             lenders = node.getLenders()  # lenders is a dict with names as keys and loansizes as values

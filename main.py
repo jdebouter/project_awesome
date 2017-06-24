@@ -21,10 +21,16 @@ def printStuff(nodes):
 ## with liquidity threshold -4 and solvency threshold -6
 network = gn.regular_network(L = 100,  d = 2, Tl = -4, Ts = -6)
 #
-avalanche_sizes = dn.run_simulation(network, 100)
-#
+avalanches = []
+for i in range(30):
+    print(i)
+    avalanche_sizes = dn.run_simulation(network, 1000)
+    for ava in avalanche_sizes:
+        avalanches.append(ava)
+    
+avalanches.append()
 ## Plot the distribution of avalanches
-#an.histogram_avalanches(avalanche_sizes, num_bins = len(avalanche_sizes), y_scale='log', x_scale='log')
+an.histogram_avalanches(avalanches, num_bins = len(avalanches), y_scale='log', x_scale='linear')
 
 # Plot the graph in a circle. NOTE: This only works on small graphs.
 # an.plot_network(network)
