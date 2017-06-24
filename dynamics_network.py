@@ -56,8 +56,10 @@ def run_simulation(network, T):
         # Banks with surplus liquidity try to invest in neighbors with negative liquidity
         _invest_surplus_liquidity(network)
         
+        DEBUG_FUNCTION(network, t)
+        
         # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes
-        _check_and_propagate_avalanche(network, avalanche_sizes)
+        _check_and_propagate_avalanche(network, avalanche_sizes, t)
                     
     # Return the list of avalanche sizes
     return avalanche_sizes
@@ -110,9 +112,10 @@ def _invest_surplus_liquidity(network):
     avalanche now to distinguish between:
     - avalanche: cascade of failures
     - infection: cascade of banks trying to regain balance by asking money from borrowers '''
-def _check_and_propagate_avalanche(network, avalanche_sizes):
+def _check_and_propagate_avalanche(network, avalanche_sizes, t):
     # If any bank has gone bankrupt, start an infection. Also get a list of bankrupt banks
     bankrupt_banks = _find_bankruptcies(network)  # list of bankrupt banks is a list of names
+    DEBUG_FUNCTION(network, t)
     if len(bankrupt_banks) > 0:  # If there are bankrupt banks
         _infect_neighbours(bankrupt_banks)  # Sets lender neighbours of bankrupt banks to infected
         infected_banks = _find_infections(network) # Puts for infected banks in a list
@@ -138,11 +141,8 @@ def _check_and_propagate_avalanche(network, avalanche_sizes):
 HELPER FUNCTIONS
 =========================================================================== '''
 
-''' Helper function for checking if any banks are now bankrupt '''           
-def _find_bankruptcies(network):
-    bankrupt_banks = []
+def DEBUG_FUNCTION(network, t):
     for node in network.nodes():
-        # THESE LINES ARE ONLY FOR DEBUGGING PURPOSES CAN BE REMOVED LATER
         # if a node is a borrower and a lender, raise an exception
         borrowing, lending = False, False
         for neighbour in node.neighbours:
@@ -151,7 +151,12 @@ def _find_bankruptcies(network):
             elif node.neighbours[neighbour] < 0:
                 borrowing = True
         if borrowing and lending:
-            raise Exception("A node is borrowing and lending at the same time. This shouldn't happen!")
+            Exception("A node is borrowing and lending at the same time in iteration %i. This shouldn't happen!" % t)
+
+''' Helper function for checking if any banks are now bankrupt '''           
+def _find_bankruptcies(network):
+    bankrupt_banks = []
+    for node in network.nodes():
         # Check whether this node is bankrupt
         if node.getCapital() <= network.graph['Ts'] or node.getLiquidity() <= network.graph['Tl']:
             node.setBankruptcy(True)
