@@ -111,8 +111,8 @@ class Bank(object):
     def findBrokeNeighbours(self):
         broke = []
         for neighbour in self.neighbours:
-            if neighbour.getLiquidity() < 0 and neighbour.getBankruptcy is not True:
-                broke.append(neighbour)
+            if neighbour.getBankruptcy is not True and neighbour.getCapital() < 0 and neighbour.getLiquidity() < 0:
+                broke.append(neighbour) 
         self.setBrokeNeighbours(broke)
         
     ''' MISCELLANEOUS FUNCTIONS '''
@@ -146,7 +146,10 @@ class Bank(object):
         self.changeDebt(neighbour, money)
         neighbour.changeDebt(self, -money)
         
-    
+    def isCapitalRight(self):
+        if not self.getCapital() == self.getTotalDebt() + self.getLiquidity():
+            print True
+            
     def __str__(self):
         out = "Node %d has %d capital and %d liquidity. " %(self.getLabel(), self.getCapital(), self.getLiquidity())
         for n in self.neighbours:
