@@ -16,12 +16,12 @@ def printStuff(nodes):
     print("\n")
     for node in nodes:
         print(node)
-#
+
 ## Build a network corresponding to regular grid with d dimensions of size L, 
 ## with liquidity threshold -4 and solvency threshold -6
-network = gn.regular_network(L = 100,  d = 2, Tl = -4, Ts = -6)
+network = gn.regular_network(L = 2,  d = 2, Tl = -4, Ts = -6)
 #
-avalanche_sizes = dn.run_simulation(network, 1000)
+avalanche_sizes = dn.run_simulation(network, 100)
 #
 ## Plot the distribution of avalanches
 #an.histogram_avalanches(avalanche_sizes, num_bins = len(avalanche_sizes), y_scale='log', x_scale='log')

@@ -10,12 +10,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def print_network(network):
-    print('\n\n\n')
-    for node in network.nodes_iter(data=True):
+    for node in network.nodes():
         print(node)
-    print()
-    for edge in network.edges_iter(data=True):
-        print(edge)
+    print('\n')
 
 def histogram_avalanches(avalanche_sizes, num_bins = 50, y_scale = 'log', x_scale = 'linear'):
     results_histogram = np.histogram(avalanche_sizes, bins=num_bins)

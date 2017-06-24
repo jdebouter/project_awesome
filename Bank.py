@@ -101,9 +101,9 @@ class Bank(object):
         borrowers = []
         lenders = []
         for neighbour, value in self.neighbours.items():
-            if value > 0 and (neighbour.getBankruptcy() is False):# and neighbour.getInfection() is False):
+            if value > 0 and (neighbour.getBankruptcy() == False):# and neighbour.getInfection() is False):
                 borrowers.append(neighbour)
-            elif value < 0 and (neighbour.getBankruptcy() is False):# and neighbour.getInfection() is False):
+            elif value < 0 and (neighbour.getBankruptcy() == False):# and neighbour.getInfection() is False):
                 lenders.append(neighbour)
         self.setBorrowers(borrowers)
         self.setLenders(lenders)
@@ -111,7 +111,7 @@ class Bank(object):
     def findBrokeNeighbours(self):
         broke = []
         for neighbour in self.neighbours:
-            if neighbour.getLiquidity() < 0 and neighbour.getBankruptcy is not True:
+            if neighbour.getLiquidity() < 0 and not neighbour.getBankruptcy():
                 broke.append(neighbour)
         self.setBrokeNeighbours(broke)
         

@@ -37,6 +37,7 @@ implemented it?
 =========================================================================== """
 
 import random
+import analyze_network as an
 
 ''' Run the simulation for T iterations '''
 def run_simulation(network, T):
@@ -47,17 +48,43 @@ def run_simulation(network, T):
         # Generate random perturbations in the liquidity for each node
         _perturb(network)
         
+        print("\n\nITERATION %i" % t)
+        print("perturb:")
+        an.print_network(network)
+        
         # Banks with surplus liquidity try to repay debts
         _repay_debts(network)
+        
+        print("Repay:")
+        an.print_network(network)
 
         # Banks without surplus can collect money back
+        print("Collect:")
         _collect_loans(network)
+        
+        an.print_network(network)
         
         # Banks with surplus liquidity try to invest in neighbors with negative liquidity
         _invest_surplus_liquidity(network)
         
+        print("invest:")
+        an.print_network(network)
+        
+        for node in network.nodes():
+            borrowing, lending = False, False
+            for neighbour in node.neighbours:
+                if node.neighbours[neighbour] > 0:
+                    lending = True
+                elif node.neighbours[neighbour] < 0:
+                    borrowing = True
+            if borrowing and lending:
+                raise Exception("(M) A node is borrowing and lending at the same time in iteration %i. This shouldn't happen!" % t)
+        
         # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes
-        _check_and_propagate_avalanche(network, avalanche_sizes)
+        _check_and_propagate_avalanche(network, avalanche_sizes, t)
+        
+        print("avalanche:")
+        an.print_network(network)
                     
     # Return the list of avalanche sizes
     return avalanche_sizes
@@ -84,7 +111,7 @@ def _collect_loans(network):
     # Iterate through the node list randomly
     node_list = network.nodes()[:]
     random.shuffle(node_list)
-    _get_money(node_list)
+    _get_money(node_list, 0)
 
 
 ''' Banks with surplus liquidity try to invest in neighbors with negative liquidity '''
@@ -110,17 +137,17 @@ def _invest_surplus_liquidity(network):
     avalanche now to distinguish between:
     - avalanche: cascade of failures
     - infection: cascade of banks trying to regain balance by asking money from borrowers '''
-def _check_and_propagate_avalanche(network, avalanche_sizes):
+def _check_and_propagate_avalanche(network, avalanche_sizes, t):
     # If any bank has gone bankrupt, start an infection. Also get a list of bankrupt banks
-    bankrupt_banks = _find_bankruptcies(network)  # list of bankrupt banks is a list of names
+    bankrupt_banks = _find_bankruptcies(network, t)  # list of bankrupt banks is a list of names
     if len(bankrupt_banks) > 0:  # If there are bankrupt banks
         _infect_neighbours(bankrupt_banks)  # Sets lender neighbours of bankrupt banks to infected
-        infected_banks = _find_infections(network) # Puts for infected banks in a list
+        infected_banks = _find_infections(network)  # Puts for infected banks in a list
         length_old_infections = len(infected_banks) 
         if len(infected_banks) > 0:  # When there are infections
               while True:
                 _spread_infections(infected_banks)  # Infected nodes repay/pay to neighbors and infect them
-                bankrupt_banks = _find_bankruptcies(network)  # Find any new bankruptcies
+                bankrupt_banks = _find_bankruptcies(network, t)  # Find any new bankruptcies
                 _infect_neighbours(bankrupt_banks)  # Make neighbors of new bankruptcies also infected
                 infected_banks = _find_infections(network)  # Finds those infections 
                 length_new_infections = len(infected_banks)
@@ -139,7 +166,7 @@ HELPER FUNCTIONS
 =========================================================================== '''
 
 ''' Helper function for checking if any banks are now bankrupt '''           
-def _find_bankruptcies(network):
+def _find_bankruptcies(network, t):
     bankrupt_banks = []
     for node in network.nodes():
         # THESE LINES ARE ONLY FOR DEBUGGING PURPOSES CAN BE REMOVED LATER
@@ -151,7 +178,7 @@ def _find_bankruptcies(network):
             elif node.neighbours[neighbour] < 0:
                 borrowing = True
         if borrowing and lending:
-            raise Exception("A node is borrowing and lending at the same time. This shouldn't happen!")
+            raise Exception("(A) A node is borrowing and lending at the same time in iteration %i. This shouldn't happen!" % t)
         # Check whether this node is bankrupt
         if node.getCapital() <= network.graph['Ts'] or node.getLiquidity() <= network.graph['Tl']:
             node.setBankruptcy(True)
@@ -234,3 +261,6 @@ def _cure(banks):
 def _reset(banks):
     for bank in banks:
         bank.reset()
+
+if __name__ == "__main__":
+    print("RUN THE MAIN YOU IDIOT")
