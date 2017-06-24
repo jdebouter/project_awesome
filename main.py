@@ -16,10 +16,18 @@ def printStuff(nodes):
     print("\n")
     for node in nodes:
         print(node)
-
-# Build a network corresponding to regular grid with d dimensions of size L, 
-# with liquidity threshold -4 and solvency threshold -6
+#
+## Build a network corresponding to regular grid with d dimensions of size L, 
+## with liquidity threshold -4 and solvency threshold -6
 network = gn.regular_network(L = 100,  d = 2, Tl = -4, Ts = -6)
+#
+avalanche_sizes = dn.run_simulation(network, 1000)
+#
+## Plot the distribution of avalanches
+#an.histogram_avalanches(avalanche_sizes, num_bins = len(avalanche_sizes), y_scale='log', x_scale='log')
+
+# Plot the graph in a circle. NOTE: This only works on small graphs.
+# an.plot_network(network)
 #
 #order = {}
 #
@@ -83,16 +91,5 @@ network = gn.regular_network(L = 100,  d = 2, Tl = -4, Ts = -6)
 #dn._check_and_propagate_avalanche(network, [])
 ##
 #printStuff(network.nodes())
-
-avalanche_sizes = dn.run_simulation(network, 1000)
-#print 
-an.histogram_avalanches(avalanche_sizes)
-# Plot the distribution of avalanches
-#print(avalanche_sizes)
-#an.histogram_avalanches(avalanche_sizes, num_bins = 20, y_scale='symlog', x_scale='symlog')
-
-# Plot the graph in a circle. NOTE: This only works on small graphs.
-# an.plot_network(network)
-
 
 
