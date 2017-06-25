@@ -7,6 +7,7 @@ interaction between nodes and the evolution of the network
 =========================================================================== """
 
 import random
+import analyze_network as an
 
 ''' Run the simulation for T iterations '''
 def run_simulation(network, T):
@@ -14,21 +15,33 @@ def run_simulation(network, T):
     
     # Simulation kernel
     for t in range(T):
+        print("\n\n\nITERATION %i" % t)
         # Generate random perturbations in the liquidity for each node
         perturb(network)
+        print("perturb:")
+        an.print_network(network)
         
         # Banks with surplus liquidity try to repay debts
         repay_debts(network)
- 
+        print("repay:")
+        an.print_network(network)
+    
         # Banks with a deficit try to collect loans back
         collect_loans(network)
- 
+        print("collect:")
+        an.print_network(network)
+    
          # Banks with surplus liquidity try to invest in neighbors with negative liquidity
         invest_surplus_liquidity(network)
-
+        print("invest:")
+        an.print_network(network)
+        
+        debug(network)
+        
         # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes
         check_and_propagate_avalanche(network, avalanche_sizes)
-        debug(network)
+        print("avalanche:")
+        an.print_network(network)
 
     # Return the list of avalanche sizes
     return avalanche_sizes
@@ -71,7 +84,7 @@ def invest_surplus_liquidity(network):
     random.shuffle(node_list)
     for node in node_list:        
         # If there's still liquidity left, help out any broke neighbors
-        if node.getTotalDebt() > 0 and node.getLiquidity() > 0:  # Changed it back! The article says nodes should have positive capital, but of course you also need positive liquidity, otherwise you have nothing to loan
+        if node.getLiquidity() > 0:  # Changed it back! The article says nodes should have positive capital, but of course you also need positive liquidity, otherwise you have nothing to loan
             # Get a list of broke neighbours        
             node.updateBrokeNeighbours()  # First update the node's list
             broke_neighbours = node.getBrokeNeighbours()
@@ -109,7 +122,7 @@ def check_and_propagate_avalanche(network, avalanche_sizes):
                 if length_new_infections == length_old_infections:
                     avalanche_sizes.append(length_new_infections)
                     _cure_all(infected_banks)  # Cures infected banks
-                    _reset_all(bankrupt_banks)  #resets every bank
+                    _reset_all(bankrupt_banks)  # resets every bank                    
                     break
                 else:
                     length_old_infections = length_new_infections
@@ -146,17 +159,17 @@ def _get_money(node_list, infection_happening = False):
             for borrower in borrowers:
                 debt = node.getDebt(borrower)  # How much has he borrowed
                 # If the debt isn't enough to cover our losses, or if this node is infected, just take it all back
-#                if abs(node.getLiquidity()) >= debt or infection_happening:
-#                    node.transfer(borrower, -debt) # 
-#                    # If this node is infected, infected the borrowing neighbour too
-#                    if infection_happening:
-#                        borrower.infect()
-#                # Else take only the amount back we need to regain balance (liquidity = 0)
-#                else:
-                node.transfer(borrower, node.getLiquidity()) 
-                if infection_happening:
-                    borrower.infect()
-#                    break
+                if abs(node.getLiquidity()) >= debt or infection_happening:
+                    node.transfer(borrower, -debt) # 
+                    # If this node is infected, infect the borrowing neighbour too
+                    if infection_happening:
+                        borrower.infect()
+                # Else take only the amount back we need to regain balance (liquidity = 0)
+                else:
+                    node.transfer(borrower, node.getLiquidity()) 
+                    if infection_happening:
+                        borrower.infect()
+    #                    break
 
 ''' Helper function to iterate through a given node list and pay back debt to neighbours'''
 def _pay_money(node_list):
