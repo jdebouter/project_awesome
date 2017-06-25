@@ -8,6 +8,7 @@ interaction between nodes and the evolution of the network
 
 import random
 import analyze_network as an
+import numpy as np
 
 ''' Default dictionary of parameters which vary the implementation details '''
 default_parameters = \
@@ -37,7 +38,7 @@ def run_simulation(network, T, parameters = None):
         collect_loans(network)
   
         # Banks with surplus liquidity try to invest in neighbors with negative liquidity 
-        invest_surplus_liquidity(network)
+        invest_surplus_liquidity(network, parameters)
     
         # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes 
         check_and_propagate_avalanche(network, avalanche_sizes)
@@ -48,6 +49,28 @@ def run_simulation(network, T, parameters = None):
         
     # Return the list of avalanche sizes
     return avalanche_sizes
+
+''' Run the simulation for 1 iteration and return the list of defaulted banks'''
+def step_simulation(network, parameters = None):
+    # If no parameters were input, just use the default parameters
+    if parameters is None:
+        parameters = default_parameters
+    
+    avalanche_sizes = []  # list of the sizes of all avalanches
+    # Generate random perturbations in the liquidity for each node
+    perturb(network)
+ 
+    # Banks with surplus liquidity try to repay debts
+    repay_debts(network, parameters)
+ 
+    # Banks with a deficit try to collect loans back
+    collect_loans(network)
+  
+    # Banks with surplus liquidity try to invest in neighbors with negative liquidity 
+    invest_surplus_liquidity(network, parameters)
+    
+    # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes 
+    return check_and_propagate_avalanche(network, avalanche_sizes)
 
 ''' =========================================================================== 
 FUNCTIONS USED IN run_simulation()
@@ -121,6 +144,7 @@ def invest_surplus_liquidity(network, parameters):
 def check_and_propagate_avalanche(network, avalanche_sizes):
     # If any bank has gone bankrupt, start an infection. Also get a list of bankrupt banks
     bankrupt_banks = _find_bankruptcies(network)  # list of bankrupt banks is a list of names
+    complete_list_of_bankruptcies = []
 
     if len(bankrupt_banks) > 0:  # If there are bankrupt banks
         
@@ -135,6 +159,8 @@ def check_and_propagate_avalanche(network, avalanche_sizes):
                 bankrupt_banks = _find_bankruptcies(network)  # Find any new bankruptcies                
                 _infect_neighbours(bankrupt_banks)  # Make neighbors of new bankruptcies also infected
                 infected_banks = _find_infections(network)  # Make list of all currently infected
+                complete_list_of_bankruptcies.append(infected_banks)
+
                 
                 # Check if there are new infections and if avalanche should be stopped
                 length_new_infections = len(infected_banks) 
@@ -147,7 +173,7 @@ def check_and_propagate_avalanche(network, avalanche_sizes):
                     length_old_infections = length_new_infections
         else:
             _reset_all(bankrupt_banks)
- 
+    return np.ndarray.flatten(np.array(complete_list_of_bankruptcies))
 ''' =========================================================================== 
 HELPER FUNCTIONS
 =========================================================================== '''

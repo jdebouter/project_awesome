@@ -33,6 +33,9 @@ class Bank(object):
     
     def getNeighbours(self):
         return self.neighbours.keys()
+     
+    def getNeighboursDict(self):
+        return self.neighbours
     
     def getTotalDebt(self):
         return sum(self.neighbours.values())
