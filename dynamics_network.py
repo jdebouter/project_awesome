@@ -128,9 +128,9 @@ def ask_for_investments(network, parameters):
                 for neighbour in rich_neighbours:
                     surplus = neighbour.getLiquidity()  # How much money does this neighbor have to offer?
                     if surplus < abs(node.getLiquidity()):  # If it's not enough
-                        node.transfer(neighbour, -surplus)  # Take it all
+                        neighbour.transfer(node, surplus)  # Take it all
                     else:
-                        node.transfer(neighbour, -node.getLiquidity())  # Else transfer what I need                    
+                        neighbour.transfer(node, -node.getLiquidity())  # Else transfer what I need                    
                         break
             # Else if diversify_trade is true, distribute investments evenly
             elif parameters['diversify_trade'] == True:
@@ -321,7 +321,7 @@ def _find_infections(network):
 '''Helper function to cure infections'''
 def _collect_money_and_spread_infection(infected_banks):
     # Setting parameters to the dictionary below is a kind of hack to make it work during infection, when its value isn't important anyway
-    _get_money(infected_banks, parameters = {"transfer_pattern":"node_by_node"}, infection_happening = True)
+    _get_money(infected_banks, parameters = {"diversify_trade": False}, infection_happening = True)
 #    _pay_money(infected_banks)
                     
 '''Helper function to cure Banks'''

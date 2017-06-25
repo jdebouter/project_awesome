@@ -20,11 +20,11 @@ import networkx as nx
         back any money that was lost. 
     too_big_to_fail - policy, more description later...'''
 parameters = {"quick_repaying" : True,
-              "diversify_trade" : False,
+              "diversify_trade" : True,
               "too_big_to_fail" : False}  # (This one is useless in a regular grid)
 
 ## Build a network 
-network = gn.regular_network(L = 100, d = 2, Tl = -4, Ts = -6)
+network = gn.regular_network(L = 20, d = 2, Tl = -4, Ts = -6)
  
 avalanche_sizes = dn.run_simulation(network, 100, parameters, DEBUG_BOOL = True)
 
