@@ -81,24 +81,38 @@ def collect_loans(network):
 
 
 ''' Banks with surplus liquidity try to invest in neighbors with negative liquidity '''
-def invest_surplus_liquidity(network):
+def invest_surplus_liquidity(network, parameters):
     # Iterate through the node list randomly
     node_list = network.nodes()[:]
     random.shuffle(node_list)
     for node in node_list:        
         # If there's still liquidity left, help out any broke neighbors
-        if node.getLiquidity() > 0 and node.getCapital() > 0:  # Changed it back! The article says nodes should have positive capital, but of course you also need positive liquidity, otherwise you have nothing to loan
+        if node.getLiquidity() > 0 and node.getCapital() > 0:  
             # Get a list of broke neighbours        
             node.updateBrokeNeighbours()  # First update the node's list
             broke_neighbours = node.getBrokeNeighbours()
-            # Iterate through broke neighbors to invest in
-            for broke in broke_neighbours:
-                money_needed = -broke.getLiquidity()  # How much money does this neighbor need?
-                if node.getLiquidity() > money_needed:  # Do I have enough money for that?
-                    node.transfer(broke, money_needed)  # Transfer that amount                    
-                else:
-                    node.transfer(broke, node.getLiquidity())  # Else transfer what I have                    
-                    break
+            if parameters['transfer_pattern'] == 'node_by_node':
+                # Iterate through broke neighbors to invest in
+                for broke in broke_neighbours:
+                    money_needed = -broke.getLiquidity()  # How much money does this neighbor need?
+                    if node.getLiquidity() > money_needed:  # Do I have enough money for that?
+                        node.transfer(broke, money_needed)  # Transfer that amount                    
+                    else:
+                        node.transfer(broke, node.getLiquidity())  # Else transfer what I have                    
+                        break
+            elif parameters['transfer_pattern'] == 'distributed_evenly':
+                # As long as I have money, and there are broke neighbors to give money to, keep giving them all 1 money
+                while node.getLiquidity() > 0 and len(broke_neighbours) > 0:
+                    remove_these = []  # Remove lenders if debt is paid
+                    for broke in broke_neighbours:
+                        if broke.getLiquidity() < 0 and node.getLiquidity() > 0:
+                            node.transfer(broke, 1)
+                        elif broke.getLiquidity() >= 0:
+                            remove_these.append(broke)
+                    # Remove lenders whose debt is paid back
+                    broke_neighbours = [b for b in broke_neighbours if not b in remove_these]
+            else:
+                raise Exception("Parameter doesn't exist. (Spelled wrong probably.)")
                 
 ''' Check for bankrupty and spread infections. Note, I'm calling it 
     avalanche now to distinguish between:
@@ -167,13 +181,13 @@ def _get_money(node_list, infection_happening = False):
             # Collect money from each
             for borrower in borrowers:
                 debt = node.getDebt(borrower)  # How much has he borrowed
-#                 If the debt isn't enough to cover our losses, or if this node is infected, just take it all back
+                # If the debt isn't enough to cover our losses, or if this node is infected, just take it all back
                 if abs(node.getLiquidity()) >= debt or infection_happening:
                     node.transfer(borrower, -debt) # 
-#                    # If this node is infected, infected the borrowing neighbour too
+                    # If this node is infected, infected the borrowing neighbour too
                     if infection_happening:
                         borrower.infect()
-#                # Else take only the amount back we need to regain balance (liquidity = 0)
+                # Else take only the amount back we need to regain balance (liquidity = 0)
                 else:
                     node.transfer(borrower, -abs(node.getLiquidity())) 
                     if infection_happening:
@@ -199,7 +213,7 @@ def _pay_money(node_list, parameters):
                         break
             # If the payment pattern is 'distributed_evenly', keep transferring one unit to each lender until I'm out of money
             elif parameters['transfer_pattern'] == 'distributed_evenly':
-                # As long as I have money, and there are lenders to give money to, keep giving them all 1 money node-by-node
+                # As long as I have money, and there are lenders to give money to, keep giving them all 1 money
                 while node.getLiquidity() > 0 and len(lenders) > 0:
                     remove_these = []  # Remove lenders if debt is paid
                     for lender in lenders:
