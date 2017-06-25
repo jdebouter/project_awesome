@@ -14,33 +14,33 @@ def run_simulation(network, T):
     avalanche_sizes = []  # list of the sizes of all avalanches
     # Simulation kernel
     for t in range(T):
-        print("\n\n\nITERATION %i" % t)
+#        print("\n\n\nITERATION %i" % t)
         # Generate random perturbations in the liquidity for each node
         perturb(network)
-        print("perturb:")
-        an.print_network(network)
+#        print("perturb:")
+#        an.print_network(network)
  
         # Banks with surplus liquidity try to repay debts
         repay_debts(network)
-        print("repay:")
-        an.print_network(network)
+#        print("repay:")
+#        an.print_network(network)
  
         # Banks with a deficit try to collect loans back
         collect_loans(network)
-        print("collect:")
-        an.print_network(network)
+#        print("collect:")
+#        an.print_network(network)
   
         # Banks with surplus liquidity try to invest in neighbors with negative liquidity 
         invest_surplus_liquidity(network)
-        print("invest:")
-        an.print_network(network)
-        debug(network)
+#        print("invest:")
+#        an.print_network(network)
+#        debug(network)
     
         # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes 
         check_and_propagate_avalanche(network, avalanche_sizes)
-        debug(network)
-        print("avalanche:") 
-        an.print_network(network)
+#        debug(network)
+#        print("avalanche:") 
+#        an.print_network(network)
 
     # Return the list of avalanche sizes
     return avalanche_sizes
@@ -221,7 +221,7 @@ def _infect_neighbours(bankrupt_banks):
 def _find_infections(network):
     infected_banks = []
     for bank in network.nodes():
-        if bank.getInfection():
+        if bank.getInfection() and not bank.getBankruptcy():
             infected_banks.append(bank)
     return infected_banks
 
