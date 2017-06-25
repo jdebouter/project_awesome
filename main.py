@@ -21,7 +21,7 @@ import networkx as nx
     too_big_to_fail - policy, more description later...'''
 parameters = {"quick_repaying" : True,
               "diversify_trade" : False,
-              "too_big_to_fail" : True}
+              "too_big_to_fail" : False}  # (This one is useless in a regular grid)
 
 ## Build a network 
 network = gn.regular_network(L = 100, d = 2, Tl = -4, Ts = -6)
@@ -37,5 +37,5 @@ avalanche_sizes = dn.run_simulation(network, 100, parameters, DEBUG_BOOL = True)
 #    avalanche_sizes = avalanche_sizes + sizes
 
 ## Plot the distribution of avalanches
-#an.histogram_avalanches(avalanche_sizes, num_bins = 100, y_scale='log', x_scale='linear')
-#an.histogram_avalanches(avalanche_sizes, num_bins = 100, y_scale='log', x_scale='log')
+an.histogram_avalanches(avalanche_sizes, num_bins = 100, y_scale='log', x_scale='linear')
+an.histogram_avalanches(avalanche_sizes, num_bins = 100, y_scale='log', x_scale='log')

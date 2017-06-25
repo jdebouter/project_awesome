@@ -16,7 +16,7 @@ DELTA = 1
 ''' Default dictionary of parameters which vary the implementation details '''
 default_parameters = {"quick_repaying" : True,
                       "diversify_trade" : False,
-                      "too_big_to_fail" : True}
+                      "too_big_to_fail" : False}
 
 ''' Run the simulation for T iterations '''
 def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
@@ -42,8 +42,8 @@ def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
         # Banks with a deficit try to collect loans back
         collect_loans(network, parameters)
   
-        # Banks with surplus liquidity try to invest in neighbors with negative liquidity 
-        invest_surplus_liquidity(network, parameters)
+        # Banks with negative liquidity ask neighbors with surpluses to invest in them
+        ask_for_investments(network, parameters)
     
         # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes 
         check_and_propagate_avalanche(network, avalanche_sizes, parameters)
@@ -112,38 +112,38 @@ def collect_loans(network, parameters):
 
 
 ''' Banks with surplus liquidity try to invest in neighbors with negative liquidity '''
-def invest_surplus_liquidity(network, parameters):
+def ask_for_investments(network, parameters):
     # Iterate through the node list randomly
     node_list = network.nodes()[:]
     random.shuffle(node_list)
-    for node in node_list:        
+    for node in node_list:
         # If there's still liquidity left, help out any broke neighbors
-        if node.getLiquidity() > 0 and node.getCapital() > 0:  
-            # Get a list of broke neighbours        
-            node.updateBrokeNeighbours()  # First update the node's list
-            broke_neighbours = node.getBrokeNeighbours()
+        if node.getLiquidity() < 0 and node.getCapital() < 0:  
+            # Get a list of rich neighbours
+            node.updateRichNeighbours()  # First update the node's list
+            rich_neighbours = node.getRichNeighbours()
             # If diversify_trade is false, pick random broke neighbors and invest in them
             if parameters['diversify_trade'] == False:
                 # Iterate through broke neighbors to invest in
-                for broke in broke_neighbours:
-                    money_needed = -broke.getLiquidity()  # How much money does this neighbor need?
-                    if node.getLiquidity() > money_needed:  # Do I have enough money for that?
-                        node.transfer(broke, money_needed)  # Transfer that amount                    
+                for neighbour in rich_neighbours:
+                    surplus = neighbour.getLiquidity()  # How much money does this neighbor have to offer?
+                    if surplus < abs(node.getLiquidity()):  # If it's not enough
+                        node.transfer(neighbour, -surplus)  # Take it all
                     else:
-                        node.transfer(broke, node.getLiquidity())  # Else transfer what I have                    
+                        node.transfer(neighbour, -node.getLiquidity())  # Else transfer what I need                    
                         break
             # Else if diversify_trade is true, distribute investments evenly
             elif parameters['diversify_trade'] == True:
                 # As long as I have money, and there are broke neighbors to give money to, keep giving them all 1 money
-                while node.getLiquidity() > 0 and len(broke_neighbours) > 0:
+                while node.getLiquidity() < 0 and len(rich_neighbours) > 0:
                     remove_these = []  # Remove lenders if debt is paid
-                    for broke in broke_neighbours:
-                        if broke.getLiquidity() < 0 and node.getLiquidity() > 0:
-                            node.transfer(broke, DELTA)
-                        elif broke.getLiquidity() >= 0:
-                            remove_these.append(broke)
+                    for neighbour in rich_neighbours:
+                        if neighbour.getLiquidity() > 0 and node.getLiquidity() < 0:
+                            node.transfer(neighbour, -DELTA)
+                        elif neighbour.getLiquidity() <= 0:
+                            remove_these.append(neighbour)
                     # Remove lenders whose debt is paid back
-                    broke_neighbours = [b for b in broke_neighbours if not b in remove_these]
+                    rich_neighbours = [r for r in rich_neighbours if not r in remove_these]
             else:
                 raise Exception("Parameter doesn't exist. (Spelled wrong probably.)")
                 

@@ -19,6 +19,7 @@ class Bank(object):
         self.neighbours = {}
         self.delta = 0
         self.injection = 0
+        self.rich_neighbours = []
 
     ''' GET FUNCTIONS '''
     def getInfection(self):
@@ -54,8 +55,8 @@ class Bank(object):
     def getDebt(self, neighbour):
         return abs(self.neighbours[neighbour])
     
-    def getBrokeNeighbours(self):
-        return self.brokes
+    def getRichNeighbours(self):
+        return self.rich_neighbours
 
     ''' SET FUNCTIONS '''
     def setBankruptcy(self, value):
@@ -84,9 +85,9 @@ class Bank(object):
             self.neighbours[neighbour] = 0
             neighbour.neighbours[self] = 0
     
-    def setBrokeNeighbours(self, broke):
-        random.shuffle(broke)
-        self.brokes = broke
+    def setRichNeighbours(self, rich_neighbours):
+        random.shuffle(rich_neighbours)
+        self.rich_neighbours = rich_neighbours
         
     ''' CHANGE FUNCTIONS for += type addition '''
     def changeLiquidity(self, chng):
@@ -112,16 +113,15 @@ class Bank(object):
                 
             elif value < 0 and (neighbour.getBankruptcy() is False):# and neighbour.getInfection() is False):
                 lenders.append(neighbour)
-                
         self.setBorrowers(borrowers)
         self.setLenders(lenders)
     
-    def updateBrokeNeighbours(self):
-        broke = []
+    def updateRichNeighbours(self):
+        rich_neighbours = []
         for neighbour in self.neighbours:
-            if neighbour.getBankruptcy() is not True and neighbour.getCapital() < 0 and neighbour.getLiquidity() < 0:
-                broke.append(neighbour) 
-        self.setBrokeNeighbours(broke)
+            if neighbour.getCapital() > 0 and neighbour.getLiquidity() > 0:
+                rich_neighbours.append(neighbour) 
+        self.setRichNeighbours(rich_neighbours)
         
     ''' MISCELLANEOUS FUNCTIONS '''
     
