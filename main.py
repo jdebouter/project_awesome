@@ -27,19 +27,11 @@ network = gn.regular_network(L = 100, d = 2, Tl = -4, Ts = -6)
         loans back after infection. 'lost_money' means that they only collect
         back any money that was lost. '''
 parameters = {"quick_repaying" : False,
-              "transfer_pattern" : "node_by_node",
+              "transfer_pattern" : "distributed_evenly",
               "loan_initiator" : "surplus",
               "infection_collect" : "all"}
 
-#avalanche_sizes = dn.run_simulation(network, 20)
+avalanche_sizes = dn.run_simulation(network, 100, parameters)
 
 ## Plot the distribution of avalanches
-for i in range(10):
-    print(i)
-    network = gn.regular_network(L = 100, d = 2, Tl = -4, Ts = -6)
-
-    avalanche_sizes = dn.run_simulation(network, 1000)
-    for ava in avalanche_sizes:
-        avalanches.append(ava)
-
-an.histogram_avalanches(avalanche_sizes, num_bins = 1000, y_scale='log', x_scale='linear')
+an.histogram_avalanches(avalanche_sizes, num_bins = 20, y_scale='log', x_scale='linear')

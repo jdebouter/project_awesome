@@ -9,11 +9,18 @@ interaction between nodes and the evolution of the network
 import random
 import analyze_network as an
 
+''' Default dictionary of parameters which vary the implementation details '''
+default_parameters = \
+    {"quick_repaying" : False, \
+     "transfer_pattern" : "node_by_node", \
+     "loan_initiator" : "surplus", \
+     "infection_collect" : "all"}
+
 ''' Run the simulation for T iterations '''
 def run_simulation(network, T, parameters = None):
     # If no parameters were input, just use the default parameters
     if parameters is None:
-        parameters = default_parameters  # (defined at bottom)
+        parameters = default_parameters
     
     avalanche_sizes = []  # list of the sizes of all avalanches
     # Simulation kernel
@@ -24,7 +31,7 @@ def run_simulation(network, T, parameters = None):
         perturb(network)
  
         # Banks with surplus liquidity try to repay debts
-        repay_debts(network)
+        repay_debts(network, parameters)
  
         # Banks with a deficit try to collect loans back
         collect_loans(network)
@@ -56,12 +63,12 @@ def perturb(network):
         node.changeCapital(delta)
 
 ''' Banks with surplus liquidity repay debts  '''
-def repay_debts(network):
+def repay_debts(network, parameters):
     # Iterate through the node list randomly
     node_list = network.nodes()[:]
     random.shuffle(node_list)
     # Repay
-    _pay_money(node_list)
+    _pay_money(node_list, parameters)
 
 
 ''' Banks with negative liquidity collect loans  '''
@@ -145,6 +152,10 @@ def debug(network):
         if borrowing and lending:
             raise Exception("A node is borrowing and lending at the same time. This shouldn't happen!")
 
+def _debug2(network):
+    for node in network.nodes():
+        node.lenderBorrowerSame()
+
 ''' Helper function to iterate through a given node list and retrieve loaned money from neighbours '''
 def _get_money(node_list, infection_happening = False):
     for node in node_list:
@@ -170,15 +181,15 @@ def _get_money(node_list, infection_happening = False):
                     break
 
 ''' Helper function to iterate through a given node list and pay back debt to neighbours'''
-def _pay_money(node_list):
+def _pay_money(node_list, parameters):
     for node in node_list:
         # Repay debt to lenders if I have a surplus
         if node.getLiquidity() > 0:
             # Get a list of the neighbors who have loaned money to this node
             node.updateBorrowersLenders()
             lenders = node.getLenders()
-            if len(lenders) > 0:
-                # Repay as much as possible to the lender associated with the highest current debt
+            # If the payment pattern is 'random', pick a random lender and repay it all, and continue like this node-by-node
+            if parameters['transfer_pattern'] == 'node_by_node':
                 for lender in lenders:
                     debt = node.getDebt(lender)  # How much money do I owe?
                     if node.getLiquidity() >= debt:  # Do I have enough money to pay it back?
@@ -186,6 +197,16 @@ def _pay_money(node_list):
                     else:
                         node.transfer(lender, node.getLiquidity())  # If I can't pay everything back, just give back what I have
                         break
+            # If the payment pattern is 'distributed_evenly', keep transferring one unit to each lender until I'm out of money
+            elif parameters['transfer_pattern'] == 'distributed_evenly':
+                if len(lenders) > 0:  # If there are any lenders
+                    # As long as I have money, keep given each lender 1 money
+                    while node.getLiquidity() > 0:
+                        for lender in lenders:
+                            if node.getDebt(lender) > 0 and node.getLiquidity() > 0:
+                                node.transfer(lender, 1)
+            else:
+                raise Exception("Parameter doesn't exist. (Spelled wrong probably)")
 
 ''' =========================================================================== 
 AVALANCHE RELATED HELPER FUNCTIONS
@@ -235,14 +256,6 @@ def _cure_all(banks):
 def _reset_all(banks):
     for bank in banks:
         bank.reset()
-
-def _debug2(network):
-    for node in network.nodes():
-        node.lenderBorrowerSame()
-        
-''' Default dictionary of parameters which vary the implementation details '''
-default_parameters = \
-    {"quick_repaying" : False, \
-     "transfer_pattern" : "node_by_node", \
-     "loan_initiator" : "surplus", \
-     "infection_collect" : "all"}
+    
+if __name__ == '__main__':
+    print("Run the main you idiot!")
