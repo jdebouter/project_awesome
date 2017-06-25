@@ -24,9 +24,9 @@ parameters = {"quick_repaying" : True,
               "too_big_to_fail" : False}  # (This one is useless in a regular grid)
 
 ## Build a network 
-network = gn.regular_network(L = 20, d = 2, Tl = -4, Ts = -6)
+network = gn.regular_network(L = 5, d = 4, Tl = -7, Ts = -10)
  
-avalanche_sizes = dn.run_simulation(network, 100, parameters, DEBUG_BOOL = True)
+avalanche_sizes = dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = False)
 
 #avalanche_sizes = []
 #for i in range(1):

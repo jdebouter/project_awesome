@@ -134,19 +134,20 @@ def ask_for_investments(network, parameters):
                         break
             # Else if diversify_trade is true, distribute investments evenly
             elif parameters['diversify_trade'] == True:
-                # As long as I have money, and there are broke neighbors to give money to, keep giving them all 1 money
+                # As long as I need, and there are rich neighbors get money from, keep collecting money
                 while node.getLiquidity() < 0 and len(rich_neighbours) > 0:
                     remove_these = []  # Remove lenders if debt is paid
+                    # Choose a neighbor to ask one unit of money from
                     for neighbour in rich_neighbours:
                         if neighbour.getLiquidity() > 0 and node.getLiquidity() < 0:
-                            node.transfer(neighbour, -DELTA)
+                            neighbour.transfer(node, DELTA)
                         elif neighbour.getLiquidity() <= 0:
                             remove_these.append(neighbour)
                     # Remove lenders whose debt is paid back
                     rich_neighbours = [r for r in rich_neighbours if not r in remove_these]
             else:
                 raise Exception("Parameter doesn't exist. (Spelled wrong probably.)")
-                
+  
 ''' Check for bankrupty and spread infections. '''
 def check_and_propagate_avalanche(network, avalanche_sizes, parameters):
     # If any bank has gone bankrupt, start an infection. Also get a list of bankrupt banks
@@ -216,13 +217,13 @@ def _get_money(node_list, parameters, infection_happening = False):
             node.updateBorrowersLenders()
             borrowers = node.getBorrowers()
             # If diversify_trade is false, pick a random borrower and get the loan back, and continue like this
-            if parameters['diversify_trade'] == False or infection_happening:
+            if infection_happening or parameters['diversify_trade'] == False:  # IMPORTANT NOTE: infection_happening should be evaluated first. Sometimes the second expression doesn't exist
                 # Collect money from each 
                 for borrower in borrowers:
                     debt = node.getDebt(borrower)  # How much has he borrowed
                     # If the debt isn't enough to cover our losses, or if this node is infected, just take it all back
                     if abs(node.getLiquidity()) >= debt or infection_happening:
-                        node.transfer(borrower, -debt) # 
+                        borrower.transfer(node, debt) # 
                         # If this node is infected, infected the borrowing neighbour too
                         if infection_happening:
                             borrower.infect()
@@ -238,7 +239,7 @@ def _get_money(node_list, parameters, infection_happening = False):
                     remove_these = []  # Remove borrowers who have returned their debt
                     for borrower in borrowers:
                         if node.getDebt(borrower) > 0 and node.getLiquidity() < 0:
-                            node.transfer(borrower, -DELTA)
+                            borrower.transfer(node, DELTA)
                         elif node.getDebt(borrower) == 0:
                             remove_these.append(borrower)
                     # Remove borrowers whose debt is collected
@@ -320,8 +321,7 @@ def _find_infections(network):
 
 '''Helper function to cure infections'''
 def _collect_money_and_spread_infection(infected_banks):
-    # Setting parameters to the dictionary below is a kind of hack to make it work during infection, when its value isn't important anyway
-    _get_money(infected_banks, parameters = {"diversify_trade": False}, infection_happening = True)
+    _get_money(infected_banks, parameters = None, infection_happening = True)  # parameters doesn't matter anyway if infection is happening
 #    _pay_money(infected_banks)
                     
 '''Helper function to cure Banks'''
