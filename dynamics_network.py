@@ -10,38 +10,35 @@ import random
 import analyze_network as an
 
 ''' Run the simulation for T iterations '''
-def run_simulation(network, T):
+def run_simulation(network, T, parameters = None):
+    # If no parameters were input, just use the default parameters
+    if parameters is None:
+        parameters = default_parameters  # (defined at bottom)
+    
     avalanche_sizes = []  # list of the sizes of all avalanches
     # Simulation kernel
     for t in range(T):
-        print("\n\n\nITERATION %i" % t)
+        if t % 10 == 0:
+            print("ITERATION %i" % t)
         # Generate random perturbations in the liquidity for each node
         perturb(network)
-        print("perturb:")
-        an.print_network(network)
  
         # Banks with surplus liquidity try to repay debts
         repay_debts(network)
-        print("repay:")
-        an.print_network(network)
  
         # Banks with a deficit try to collect loans back
         collect_loans(network)
-        print("collect:")
-        an.print_network(network)
   
         # Banks with surplus liquidity try to invest in neighbors with negative liquidity 
         invest_surplus_liquidity(network)
-        print("invest:")
-        an.print_network(network)
-        debug(network)
     
         # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes 
         check_and_propagate_avalanche(network, avalanche_sizes)
+        
+        # just checking the correctness of the program:
         debug(network)
-        print("avalanche:") 
-        an.print_network(network)
-
+        _debug2(network)
+        
     # Return the list of avalanche sizes
     return avalanche_sizes
 
@@ -105,7 +102,6 @@ def check_and_propagate_avalanche(network, avalanche_sizes):
     bankrupt_banks = _find_bankruptcies(network)  # list of bankrupt banks is a list of names
 
     if len(bankrupt_banks) > 0:  # If there are bankrupt banks
-
         
         _infect_neighbours(bankrupt_banks)  # Sets lender neighbours of bankrupt banks to infected
         infected_banks = _find_infections(network) # Put all infected banks in a list
@@ -124,7 +120,7 @@ def check_and_propagate_avalanche(network, avalanche_sizes):
                 if length_new_infections == length_old_infections:
                     avalanche_sizes.append(length_new_infections)
                     _cure_all(infected_banks)  # Cures infected banks
-                    _reset_all(bankrupt_banks)  #resets every bank
+                    _reset_all(bankrupt_banks)  # resets every bank
                     break
                 else:
                     length_old_infections = length_new_infections
@@ -135,7 +131,7 @@ def check_and_propagate_avalanche(network, avalanche_sizes):
 HELPER FUNCTIONS
 =========================================================================== '''
 
-'''Helper function to Debug'''
+''' Helper function to Debug '''
 def debug(network):
     for node in network.nodes():
         # if a node is a borrower and a lender, raise an exception
@@ -243,3 +239,10 @@ def _reset_all(banks):
 def _debug2(network):
     for node in network.nodes():
         node.lenderBorrowerSame()
+        
+''' Default dictionary of parameters which vary the implementation details '''
+default_parameters = \
+    {"quick_repaying" : False, \
+     "transfer_pattern" : "node_by_node", \
+     "loan_initiator" : "surplus", \
+     "infection_collect" : "all"}
