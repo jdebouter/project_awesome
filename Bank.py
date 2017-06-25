@@ -17,6 +17,8 @@ class Bank(object):
         self.bankruptcy = False
         self.infection = False
         self.neighbours = {}
+        self.delta = 0
+        self.injection = 0
 
     ''' GET FUNCTIONS '''
     def getInfection(self):
