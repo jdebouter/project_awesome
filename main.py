@@ -17,17 +17,16 @@ import networkx as nx
         that some random node is chosen and all debt/loan is repayed / collected
         until balance is regained. 'evenly_distributed' means that they'll try
         to repay/collect from all borrowers/lenders evenly
-    (UNFINISHED)
-    infection_collect = all/lost_money. 'all' means that nodes collect all 
-        loans back after infection. 'lost_money' means that they only collect
-        back any money that was lost. '''
-parameters = {"quick_repaying" : False,
-              "transfer_pattern" : "node_by_node",
-              "infection_collect" : "all"}
+        back any money that was lost. 
+    too_big_to_fail - policy, more description later...'''
+parameters = {"quick_repaying" : True,
+              "diversify_trade" : False,
+              "too_big_to_fail" : True}
 
 ## Build a network 
-network = gn.regular_network(L = 3, d = 2, Tl = -4, Ts = -6)
-#avalanche_sizes = dn.run_simulation(network, 500, parameters)
+network = gn.regular_network(L = 100, d = 2, Tl = -4, Ts = -6)
+ 
+avalanche_sizes = dn.run_simulation(network, 100, parameters, DEBUG_BOOL = True)
 
 #avalanche_sizes = []
 #for i in range(1):

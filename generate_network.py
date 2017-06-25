@@ -61,6 +61,7 @@ attributes and functionality.
 ''' Create the same number of banks as in the given networkx network '''
 def _replaceNodesWithBankObjects(G, Tl, Ts):
     # Add the liquidity threshold and solvency threshold
+    G.graph['hubs_with_loan'] = []
     G.graph['Tl'] = Tl
     G.graph['Ts'] = Ts
     # create the appropriate number of banks

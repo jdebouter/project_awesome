@@ -167,10 +167,12 @@ class Bank(object):
         self.capital = 0
         self.liquidity = 0
         self.setNoDebt()
+        self.injection = False
 
     ''' Debugging function I think. Used to check if the capital still equals the liquidity + loans/debts. '''
     def isCapitalRight(self):
         if not self.getCapital() == self.getTotalDebt() + self.getLiquidity():
+            print(self)
             raise Exception("Capital isn't right!")
             
     ''' This gets invoked when doing print(node). Print usefull stuff instead of node reference memory address '''
