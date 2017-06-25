@@ -7,43 +7,40 @@ interaction between nodes and the evolution of the network
 =========================================================================== """
 
 import random
+import analyze_network as an
 
 ''' Run the simulation for T iterations '''
 def run_simulation(network, T):
     avalanche_sizes = []  # list of the sizes of all avalanches
-#    perturb(network)
-#    invest_surplus_liquidity(network)
     # Simulation kernel
     for t in range(T):
-        print t
-#        _debug2(network)
+        print("\n\n\nITERATION %i" % t)
         # Generate random perturbations in the liquidity for each node
         perturb(network)
-        
+        print("perturb:")
+        an.print_network(network)
+ 
         # Banks with surplus liquidity try to repay debts
         repay_debts(network)
-#        print('debt1')
-#        debug(network)
-#        print('debt1')
+        print("repay:")
+        an.print_network(network)
  
         # Banks with a deficit try to collect loans back
         collect_loans(network)
-#        print('loan1')
-#        debug(network)
-#        print('loan1')
-# 
-
-         # Banks with surplus liquidity try to invest in neighbors with negative liquidity
+        print("collect:")
+        an.print_network(network)
+  
+        # Banks with surplus liquidity try to invest in neighbors with negative liquidity 
         invest_surplus_liquidity(network)
-#        print('invest1')
+        print("invest:")
+        an.print_network(network)
         debug(network)
-#        print('invest2') 
-
-        # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes
+    
+        # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes 
         check_and_propagate_avalanche(network, avalanche_sizes)
-#        print('ava1')
-#        debug(network)
-#        print('ava2')
+        debug(network)
+        print("avalanche:") 
+        an.print_network(network)
 
     # Return the list of avalanche sizes
     return avalanche_sizes
