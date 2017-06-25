@@ -15,6 +15,12 @@ def print_network(network):
         print(node)
     print('\n')
 
+''' Print the capital, liquidity and loans/debts for given nodes'''
+def print_node_list(node_list):
+    for node in node_list:
+        print(node)
+    print('\n')
+
 ''' Plot a histogram of the avalanche sizes '''
 def histogram_avalanches(avalanche_sizes, num_bins = 50, y_scale = 'log', x_scale = 'log'):
     results_histogram = np.histogram(avalanche_sizes, bins=num_bins)

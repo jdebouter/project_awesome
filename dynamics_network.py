@@ -199,12 +199,16 @@ def _pay_money(node_list, parameters):
                         break
             # If the payment pattern is 'distributed_evenly', keep transferring one unit to each lender until I'm out of money
             elif parameters['transfer_pattern'] == 'distributed_evenly':
-                if len(lenders) > 0:  # If there are any lenders
-                    # As long as I have money, keep given each lender 1 money
-                    while node.getLiquidity() > 0:
-                        for lender in lenders:
-                            if node.getDebt(lender) > 0 and node.getLiquidity() > 0:
-                                node.transfer(lender, 1)
+                # As long as I have money, and there are lenders to give money to, keep giving them all 1 money node-by-node
+                while node.getLiquidity() > 0 and len(lenders) > 0:
+                    remove_these = []  # Remove lenders if debt is paid
+                    for lender in lenders:
+                        if node.getDebt(lender) > 0 and node.getLiquidity() > 0:
+                            node.transfer(lender, 1)
+                        elif node.getDebt(lender) <= 0:
+                            remove_these.append(lender)
+                    # Remove lenders whose debt is paid back
+                    lenders = [l for l in lenders if not l in remove_these]
             else:
                 raise Exception("Parameter doesn't exist. (Spelled wrong probably)")
 
