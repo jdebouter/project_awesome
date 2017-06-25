@@ -16,9 +16,9 @@ import time
 network = gn.regular_network(L = 100,  d = 2, Tl = -4, Ts = -6)
 #
 avalanches = []
-for i in range(10):
+for i in range(1):
     print(i)
-    avalanche_sizes = dn.run_simulation(network, 1000)
+    avalanche_sizes = dn.run_simulation(network, 100)
     for ava in avalanche_sizes:
         avalanches.append(ava)
     

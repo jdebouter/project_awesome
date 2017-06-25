@@ -64,7 +64,7 @@ class Bank(object):
         self.liquidity = liq
     
     def setCapital(self, chng):
-        self.capital += chng
+        self.capital = chng
 
     def setBorrowers(self, borrowers):
         random.shuffle(borrowers)
@@ -76,7 +76,8 @@ class Bank(object):
     
     def setNoDebt(self):
         for neighbour in self.neighbours:
-            self.neighbours[neighbour] = 0 
+            self.neighbours[neighbour] = 0
+            neighbour.neighbours[self] = 0
     
     def setBrokeNeighbours(self, broke):
         random.shuffle(broke)
@@ -99,18 +100,21 @@ class Bank(object):
     def updateBorrowersLenders(self):
         borrowers = []
         lenders = []
-        for neighbour, value in self.neighbours.items():
+        for neighbour in self.getNeighbours():
+            value = self.neighbours[neighbour]
             if value > 0 and (neighbour.getBankruptcy() is False):# and neighbour.getInfection() is False):
                 borrowers.append(neighbour)
+                
             elif value < 0 and (neighbour.getBankruptcy() is False):# and neighbour.getInfection() is False):
                 lenders.append(neighbour)
+                
         self.setBorrowers(borrowers)
         self.setLenders(lenders)
     
     def updateBrokeNeighbours(self):
         broke = []
         for neighbour in self.neighbours:
-            if neighbour.getBankruptcy() is not True and neighbour.getCapital() < 0: # and neighbour.getTotalDebt() < 0:
+            if neighbour.getBankruptcy() is not True and neighbour.getCapital() < 0 and neighbour.getLiquidity() < 0:
                 broke.append(neighbour) 
         self.setBrokeNeighbours(broke)
         
@@ -122,6 +126,11 @@ class Bank(object):
         neighbour.changeLiquidity(money)
         self.changeDebt(neighbour, money)
         neighbour.changeDebt(self, -money)
+        
+    def lenderBorrowerSame(self):
+        for neighbour in self.getNeighbours():
+            if not self.getDebt(neighbour) == neighbour.getDebt(self):
+                raise Exception("This doesn't make senseB!")
 
     ''' This function is for network generation only.  '''
     def putNeighbours(self, neighbours, amount_withothers):
@@ -136,17 +145,19 @@ class Bank(object):
         so '''
     def infect(self, bank = None):
         self.infection = True
+        
         if not bank is None:  # this function is called for all neighbors of 
             self.loseMoney(bank)
 
     ''' ??? Where is this used? Why? '''
     def loseMoney(self, bank):
         self.changeCapital(-self.getDebt(bank))
+        bank.changeDebt(self, self.getDebt(bank))
         self.changeDebt(bank, -self.getDebt(bank))
-
+                
     ''' Reset all attributes of a bank (used after bankruptcy avalanche is over) '''
     def reset(self):
-        self.Bankruptcy = False
+        self.bankruptcy = False
         self.infection = False
         self.capital = 0
         self.liquidity = 0
