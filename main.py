@@ -17,11 +17,11 @@ import networkx as nx
 network = gn.regular_network(L = 100, d = 2, Tl = -4, Ts = -6)
 
 # Run the simulation for 100 iteration
-avalanche_sizes = dn.run_simulation(network, 1000)
+avalanche_sizes = dn.run_simulation(network, 100)
 
 # Plot the distribution of avalanches
 print(avalanche_sizes)
-an.histogram_avalanches(avalanche_sizes, num_bins = 20, y_scale = 'symlog')
+#an.histogram_avalanches(avalanche_sizes, num_bins = 20, y_scale = 'symlog')
 
 # Plot the graph in a circle. NOTE: This only works on small graphs.
 # an.plot_network(network)

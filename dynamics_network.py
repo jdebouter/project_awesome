@@ -29,6 +29,30 @@ for the lattice/regular network they're tuples of integers, eg (0,1)
 =========================================================================== """
 
 import random
+import analyze_network as an
+
+def DEBUG(network, t):
+    for node in network.nodes(data=True):
+        borrower, lender = False, False
+        node_name = node[0]
+        totalDebt = 0
+        for neighbor in network.neighbors(node_name):
+            our_edge = network.edge[node_name][neighbor]
+            borrower, lender = False, False
+            if our_edge['debt'] != 0 and our_edge['borrower'] == node_name:
+                borrower = True
+                totalDebt -= our_edge['debt']
+            if our_edge['debt'] != 0 and our_edge['lender'] == node_name:
+                lender = True
+                totalDebt += our_edge['debt']
+        if borrower and lender:
+            raise Exception("A node is borrower and lender at the same time!")
+        if node[1]['capital'] != node[1]['liquidity'] + totalDebt:
+            print(node[1]['capital'])
+            print(node[1]['liquidity'])
+            print(totalDebt)
+            raise Exception("Something's wrong with the values in iteration %i" % t)
+        
 
 ''' Run the simulation for T iterations '''
 def run_simulation(network, T):
@@ -36,18 +60,32 @@ def run_simulation(network, T):
     
     # Simulation kernel
     for t in range(T):
+#        print("\n\n\nITERATION %i" % t)
         # Generate random perturbations in the liquidity for each node
         _perturb(network)
-        
+#        print("perturb:")
+#        an.print_network(network)
+#        DEBUG(network, t)
+
         # Banks with surplus liquidity try to repay debts
         _repay_debts(network)
-        
+#        print("repay:")
+#        an.print_network(network)
+#        DEBUG(network, t)
+
         # Banks with surplus liquidity try to invest in neighbors with negative liquidity
         _invest_surplus_liquidity(network)
-        
+#        print("invest:")
+#        an.print_network(network)
+#        DEBUG(network, t)
+
+
         # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes
         _check_and_propagate_avalanche(network, avalanche_sizes)
-                    
+#        print("avalanche")
+#        an.print_network(network)     
+#        DEBUG(network, t)
+
     # Return the list of avalanche sizes
     return avalanche_sizes
 
@@ -159,6 +197,14 @@ def _check_and_propagate_avalanche(network, avalanche_sizes):
                     network.node[neighbor]['capital'] -= our_edge['debt']
                     # Reset the edge
                     __reset_edge(our_edge)
+                # If there is a debt, and the neighbor was the borrower, add this neighbor to the infected
+                if our_edge['debt'] != 0 and our_edge['borrower'] == neighbor:
+                    current_infected.append(neighbor)
+                    # Add the borrowed money to the neighbor's capital
+                    network.node[neighbor]['capital'] += our_edge['debt']
+                    # Reset the edge
+                    __reset_edge(our_edge)
+
 
         # For each of the infected, try to recover losses
         new_infected = []
