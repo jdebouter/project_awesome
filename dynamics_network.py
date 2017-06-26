@@ -28,7 +28,7 @@ def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
         parameters = default_parameters
     print(parameters)
     
-    # Multiply the Ts and Tl with UNIT so that
+    # Multiply the Ts and Tl with UNIT so that we can just input -4/-6 in main, but here there converted appropriately to -400/-600
     network.graph['Tl'] *= UNIT
     network.graph['Ts'] *= UNIT
     
@@ -94,7 +94,7 @@ FUNCTIONS USED IN run_simulation()
 def perturb(network):
     for node in network.nodes():  # data=True makes it retrieve all extra attributes
         # Randomly generate delta
-        delta = random.choice([-DELTA, DELTA)
+        delta = random.choice([-DELTA, DELTA])
         # Update liquidity and capital
         node.changeLiquidity(delta)
         node.changeCapital(delta)
