@@ -9,6 +9,9 @@ import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 import Bank as kk
+import dynamics_network as dn
+
+BALANCE = dn.BALANCE
 
 ''' Generate and return a network that corresponds to a regular lattice
     with dimension d and dimensions with size L.
@@ -73,7 +76,7 @@ def _replaceNodesWithBankObjects(G, Tl, Ts):
 def createBanks(tot_banks):
     banks = []
     for i in range(tot_banks):
-        banks.append(kk.Bank(i, 0))
+        banks.append(kk.Bank(i, BALANCE))
     return banks
 
 """ Objects of the Bank class are assigned as Nodes. """

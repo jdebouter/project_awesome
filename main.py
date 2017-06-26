@@ -24,8 +24,8 @@ import pickle
         back the lost capital
     too_big_to_fail - policy, more description later...'''
 parameters = {"quick_repaying" : True,
-              "diversify_trade" : True,
-              "too_big_to_fail" : False, # (This one is useless in a regular grid)
+              "diversify_trade" : True,  # I have an untested intuition that this will cause bugs if we set perturbation to 0.75 instead of 1
+              "too_big_to_fail" : True,  # (This one is useless in a regular grid)
               "panic_collection": True}  
 
 ## Build a network 
@@ -34,8 +34,10 @@ parameters = {"quick_repaying" : True,
 #network = gn.mean_field_network(1000, -4, -6)
 #pickle.dump(network, open("MEAN_FIELD_SAVED\mean_field_N1000_tl-4_ts-6.pickle", 'wb'))
 network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N1000_tl-4_ts-6.pickle", "rb" ))
+network.graph['Tl'] = -20
+network.graph['Ts'] = -30
 
-avalanche_sizes = dn.run_simulation(network, 500, parameters, DEBUG_BOOL = True)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
+avalanche_sizes = dn.run_simulation(network, 500, parameters, DEBUG_BOOL = False)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
 
 ## Plot the distribution of avalanches
 an.histogram_avalanches(avalanche_sizes, num_bins = 100, y_scale='log', x_scale='linear')

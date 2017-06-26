@@ -6,6 +6,9 @@ should be renamed
 
 import random 
 import networkx as nx
+import dynamics_network as dn
+
+BALANCE = dn.BALANCE
 
 # Definition of a Banking Node 
 
@@ -123,7 +126,7 @@ class Bank(object):
     def updateRichNeighbours(self):
         rich_neighbours = []
         for neighbour in self.neighbours:
-            if neighbour.getCapital() > 0 and neighbour.getLiquidity() > 0:
+            if neighbour.getCapital() > BALANCE and neighbour.getLiquidity() > BALANCE:
                 rich_neighbours.append(neighbour) 
         self.setRichNeighbours(rich_neighbours)
         
@@ -170,8 +173,8 @@ class Bank(object):
     def reset(self):
         self.bankruptcy = False
         self.infection = False
-        self.capital = 0
-        self.liquidity = 0
+        self.capital = BALANCE
+        self.liquidity = BALANCE
         self.setNoDebt()
         self.injection = False
         self.money_lost = 0
