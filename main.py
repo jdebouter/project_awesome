@@ -18,10 +18,14 @@ import networkx as nx
         until balance is regained. 'evenly_distributed' means that they'll try
         to repay/collect from all borrowers/lenders evenly
         back any money that was lost. 
+    panic_collection - True/False. 'True' means that infected bank collects
+        collects money from all its borrower. 'False' means that bank only collects 
+        back the lost capital
     too_big_to_fail - policy, more description later...'''
 parameters = {"quick_repaying" : True,
               "diversify_trade" : True,
-              "too_big_to_fail" : False}  # (This one is useless in a regular grid)
+              "too_big_to_fail" : False,
+              "panic_collection": False}  # (This one is useless in a regular grid)
 
 ## Build a network 
 network = gn.regular_network(L = 5, d = 4, Tl = -7, Ts = -10)

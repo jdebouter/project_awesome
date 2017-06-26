@@ -20,6 +20,7 @@ class Bank(object):
         self.delta = 0
         self.injection = 0
         self.rich_neighbours = []
+        self.money_lost = 0
 
     ''' GET FUNCTIONS '''
     def getInfection(self):
@@ -57,7 +58,9 @@ class Bank(object):
     
     def getRichNeighbours(self):
         return self.rich_neighbours
-
+    def getMoneyLost(self):
+        return self.money_lost
+    
     ''' SET FUNCTIONS '''
     def setBankruptcy(self, value):
         self.bankruptcy = value
@@ -156,9 +159,11 @@ class Bank(object):
 
     ''' ??? Where is this used? Why? '''
     def loseMoney(self, bank):
+        self.money_lost += self.getDebt(bank)
         self.changeCapital(-self.getDebt(bank))
         bank.changeDebt(self, self.getDebt(bank))
         self.changeDebt(bank, -self.getDebt(bank))
+         
                 
     ''' Reset all attributes of a bank (used after bankruptcy avalanche is over) '''
     def reset(self):
@@ -168,6 +173,7 @@ class Bank(object):
         self.liquidity = 0
         self.setNoDebt()
         self.injection = False
+        self.money_lost = 0
 
     ''' Debugging function I think. Used to check if the capital still equals the liquidity + loans/debts. '''
     def isCapitalRight(self):

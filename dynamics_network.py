@@ -16,7 +16,8 @@ DELTA = 1
 ''' Default dictionary of parameters which vary the implementation details '''
 default_parameters = {"quick_repaying" : True,
                       "diversify_trade" : False,
-                      "too_big_to_fail" : False}
+                      "too_big_to_fail" : False,
+                      "panic_collection" : True}
 
 ''' Run the simulation for T iterations '''
 def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
@@ -76,7 +77,7 @@ def step_simulation(network, parameters = None):
     invest_surplus_liquidity(network, parameters)
     
     # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes 
-    return check_and_propagate_avalanche(network, avalanche_sizes)
+    return check_and_propagate_avalanche(network, avalanche_sizes, parameters)
 
 ''' =========================================================================== 
 FUNCTIONS USED IN run_simulation()
@@ -167,7 +168,7 @@ def check_and_propagate_avalanche(network, avalanche_sizes, parameters):
         if len(infected_banks) > 0:  # When there are infections
             while True:
                 # Within one iteration, all infected nodes collect money and infect neighbors, and new bankruptcies happen
-                _collect_money_and_spread_infection(infected_banks)  # Infected nodes collect money from neighbors and infect them
+                _collect_money_and_spread_infection(infected_banks, parameters)  # Infected nodes collect money from neighbors and infect them
                 bankrupt_banks = _find_bankruptcies(network)  # Find any new bankruptcies                
                 _infect_neighbours(bankrupt_banks)  # Make neighbors of new bankruptcies also infected
                 infected_banks = _find_infections(network)  # Make list of all currently infected
@@ -216,20 +217,27 @@ def _get_money(node_list, parameters, infection_happening = False):
             # Get a list of the neighbors who have borrowed money from this node
             node.updateBorrowersLenders()
             borrowers = node.getBorrowers()
+            if parameters['panic_collection'] and infection_happening:
+                money_needed = abs(node.getTotalDebt())
+            elif infection_happening:
+                money_needed = node.getMoneyLost()
+            else:
+                money_needed = abs(node.getLiquidity())
             # If diversify_trade is false, pick a random borrower and get the loan back, and continue like this
             if infection_happening or parameters['diversify_trade'] == False:  # IMPORTANT NOTE: infection_happening should be evaluated first. Sometimes the second expression doesn't exist
+                
                 # Collect money from each 
                 for borrower in borrowers:
                     debt = node.getDebt(borrower)  # How much has he borrowed
                     # If the debt isn't enough to cover our losses, or if this node is infected, just take it all back
-                    if abs(node.getLiquidity()) >= debt or infection_happening:
+                    if money_needed >= debt or infection_happening:
                         borrower.transfer(node, debt) # 
                         # If this node is infected, infected the borrowing neighbour too
                         if infection_happening:
                             borrower.infect()
                     # Else take only the amount back we need to regain balance (liquidity = 0)
                     else:
-                        node.transfer(borrower, -abs(node.getLiquidity())) 
+                        node.transfer(borrower, -abs(money_needed)) 
                         if infection_happening:
                             borrower.infect()
                         break
@@ -320,8 +328,8 @@ def _find_infections(network):
     return infected_banks
 
 '''Helper function to cure infections'''
-def _collect_money_and_spread_infection(infected_banks):
-    _get_money(infected_banks, parameters = None, infection_happening = True)  # parameters doesn't matter anyway if infection is happening
+def _collect_money_and_spread_infection(infected_banks, parameters):
+    _get_money(infected_banks, parameters, infection_happening = True)  # parameters doesn't matter anyway if infection is happening
 #    _pay_money(infected_banks)
                     
 '''Helper function to cure Banks'''
