@@ -6,6 +6,7 @@ import generate_network as gn
 import dynamics_network as dn
 import analyze_network as an
 import networkx as nx
+import pickle
 
 ''' Parameters that change the implementation a little:
     quick_repaying = True/False. True means that banks will repay a debt if 
@@ -24,21 +25,17 @@ import networkx as nx
     too_big_to_fail - policy, more description later...'''
 parameters = {"quick_repaying" : True,
               "diversify_trade" : True,
-              "too_big_to_fail" : False,
-              "panic_collection": False}  # (This one is useless in a regular grid)
+              "too_big_to_fail" : False, # (This one is useless in a regular grid)
+              "panic_collection": True}  
 
 ## Build a network 
-network = gn.regular_network(L = 5, d = 4, Tl = -7, Ts = -10)
- 
-avalanche_sizes = dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = False)
+#network = gn.barabasi_albert_network(1000, 100, -4, -6)
 
-#avalanche_sizes = []
-#for i in range(1):
-#    network = gn.regular_network(L = 10, d = 4, Tl = -7, Ts = -10)
-#    sizes = dn.run_simulation(network, 1000, parameters)
-#    # Remove first 10%
-#    sizes = sizes[int(len(sizes) / 10.0) : ]
-#    avalanche_sizes = avalanche_sizes + sizes
+#network = gn.mean_field_network(1000, -4, -6)
+#pickle.dump(network, open("MEAN_FIELD_SAVED\mean_field_N1000_tl-4_ts-6.pickle", 'wb'))
+network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N1000_tl-4_ts-6.pickle", "rb" ))
+
+avalanche_sizes = dn.run_simulation(network, 500, parameters, DEBUG_BOOL = True)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
 
 ## Plot the distribution of avalanches
 an.histogram_avalanches(avalanche_sizes, num_bins = 100, y_scale='log', x_scale='linear')

@@ -58,6 +58,7 @@ class Bank(object):
     
     def getRichNeighbours(self):
         return self.rich_neighbours
+
     def getMoneyLost(self):
         return self.money_lost
     
@@ -154,10 +155,10 @@ class Bank(object):
     def infect(self, bank = None):
         self.infection = True
         
-        if not bank is None:  # this function is called for all neighbors of 
+        if not bank is None:  # When this function is called for neighbours of an infected (not bankrupt) bank, the bank argument isn't set, so the neighbour doesn't lose money. When this function is called for neighbours of bankrupt banks, bank is set to something, and the neighbours lose capital appropriately
             self.loseMoney(bank)
 
-    ''' ??? Where is this used? Why? '''
+    ''' DESCRIPTION '''
     def loseMoney(self, bank):
         self.money_lost += self.getDebt(bank)
         self.changeCapital(-self.getDebt(bank))

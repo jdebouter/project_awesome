@@ -133,7 +133,9 @@ def _compute_credit_ratings(N):
 def _compute_lending_freq(credit_ratings, m):
     N = len(credit_ratings)
     w = _compute_w(credit_ratings)
-    for t in range(1000):
+    for t in range(100):
+        if t % 10 == 0:
+            print("lending freq t%i out of %i" % (t, 100))
         for i in range(N):
             # Equation 4 in the paper.
             credit_ratings[i] = np.sum(w[i, i+1:]) + m / N
@@ -157,8 +159,7 @@ def _mean_field_graph(N, Tl, Ts, c, m):
         for j in range(i, N):
             if lending_freq[i, j] >= w_t:
                 G.add_edge(i, j)
-    FG = _addBanks(G, Tl, Ts)
-    return FG
+    return _replaceNodesWithBankObjects(G, Tl, Ts)
 
 
 

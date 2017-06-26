@@ -24,6 +24,7 @@ def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
     # If no parameters were input, just use the default parameters
     if parameters is None:
         parameters = default_parameters
+    print(parameters)
     
     avalanche_sizes = []  # list of the sizes of all avalanches
     # Simulation kernel
@@ -174,7 +175,6 @@ def check_and_propagate_avalanche(network, avalanche_sizes, parameters):
                 infected_banks = _find_infections(network)  # Make list of all currently infected
                 complete_list_of_bankruptcies.append(infected_banks)
 
-                
                 # Check if there are new infections and if avalanche should be stopped
                 length_new_infections = len(infected_banks) 
                 if length_new_infections == length_old_infections:
@@ -187,6 +187,7 @@ def check_and_propagate_avalanche(network, avalanche_sizes, parameters):
         else:
             _reset_all(bankrupt_banks)
     return np.ndarray.flatten(np.array(complete_list_of_bankruptcies))
+
 ''' =========================================================================== 
 HELPER FUNCTIONS
 =========================================================================== '''
@@ -329,7 +330,7 @@ def _find_infections(network):
 
 '''Helper function to cure infections'''
 def _collect_money_and_spread_infection(infected_banks, parameters):
-    _get_money(infected_banks, parameters, infection_happening = True)  # parameters doesn't matter anyway if infection is happening
+    _get_money(infected_banks, parameters, infection_happening = True)
 #    _pay_money(infected_banks)
                     
 '''Helper function to cure Banks'''
