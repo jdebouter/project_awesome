@@ -11,11 +11,13 @@ import networkx as nx
 import analyze_network as an
 import numpy as np
 
-DELTA = 1
+UNIT = 100  # Multiply everything by this value
+BALANCE = 1 * UNIT
+DELTA = round(1 * UNIT)
 
 ''' Default dictionary of parameters which vary the implementation details '''
 default_parameters = {"quick_repaying" : True,
-                      "diversify_trade" : False,
+                      "diversify_trade" : True,
                       "too_big_to_fail" : False,
                       "panic_collection" : True}
 
@@ -26,10 +28,14 @@ def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
         parameters = default_parameters
     print(parameters)
     
+    # Multiply the Ts and Tl with UNIT so that we can just input -4/-6 in main, but here there converted appropriately to -400/-600
+    network.graph['Tl'] *= UNIT
+    network.graph['Ts'] *= UNIT
+    
     avalanche_sizes = []  # list of the sizes of all avalanches
     # Simulation kernel
     for t in range(T):
-        if t % 10 == 0:
+        if t % 50 == 0:
             print("ITERATION %i" % t)
         # Generate random perturbations in the liquidity for each node
         perturb(network)
@@ -87,7 +93,7 @@ FUNCTIONS USED IN run_simulation()
 ''' Each bank gets or loses some capital randomly (delta=1 v delta=-1) '''
 def perturb(network):
     for node in network.nodes():  # data=True makes it retrieve all extra attributes
-        # Randomly generate delta    
+        # Randomly generate delta
         delta = random.choice([-DELTA, DELTA])
         # Update liquidity and capital
         node.changeLiquidity(delta)
@@ -120,7 +126,7 @@ def ask_for_investments(network, parameters):
     random.shuffle(node_list)
     for node in node_list:
         # If there's still liquidity left, help out any broke neighbors
-        if node.getLiquidity() < 0 and node.getCapital() < 0:  
+        if node.getLiquidity() < BALANCE and node.getCapital() < BALANCE:  
             # Get a list of rich neighbours
             node.updateRichNeighbours()  # First update the node's list
             rich_neighbours = node.getRichNeighbours()
@@ -137,13 +143,13 @@ def ask_for_investments(network, parameters):
             # Else if diversify_trade is true, distribute investments evenly
             elif parameters['diversify_trade'] == True:
                 # As long as I need, and there are rich neighbors get money from, keep collecting money
-                while node.getLiquidity() < 0 and len(rich_neighbours) > 0:
+                while node.getLiquidity() < BALANCE and len(rich_neighbours) > 0:
                     remove_these = []  # Remove lenders if debt is paid
                     # Choose a neighbor to ask one unit of money from
                     for neighbour in rich_neighbours:
-                        if neighbour.getLiquidity() > 0 and node.getLiquidity() < 0:
+                        if neighbour.getLiquidity() > BALANCE and node.getLiquidity() < BALANCE:
                             neighbour.transfer(node, DELTA)
-                        elif neighbour.getLiquidity() <= 0:
+                        elif neighbour.getLiquidity() <= BALANCE:
                             remove_these.append(neighbour)
                     # Remove lenders whose debt is paid back
                     rich_neighbours = [r for r in rich_neighbours if not r in remove_these]
@@ -244,10 +250,10 @@ def _get_money(node_list, parameters, infection_happening = False):
                         break
             # If diversify_trade is true, distribute loan collecting evenly
             elif parameters['diversify_trade'] == True:
-                while node.getLiquidity() < 0 and len(borrowers) > 0:
+                while node.getLiquidity() < BALANCE and len(borrowers) > 0:
                     remove_these = []  # Remove borrowers who have returned their debt
                     for borrower in borrowers:
-                        if node.getDebt(borrower) > 0 and node.getLiquidity() < 0:
+                        if node.getDebt(borrower) > 0 and node.getLiquidity() < BALANCE:
                             borrower.transfer(node, DELTA)
                         elif node.getDebt(borrower) == 0:
                             remove_these.append(borrower)
@@ -260,7 +266,7 @@ def _get_money(node_list, parameters, infection_happening = False):
 def _pay_money(node_list, parameters):
     for node in node_list:
         # Repay debt to lenders if I have a surplus
-        if node.getLiquidity() > 0:
+        if node.getLiquidity() > BALANCE:
             # Get a list of the neighbors who have loaned money to this node
             node.updateBorrowersLenders()
             lenders = node.getLenders()
@@ -276,10 +282,10 @@ def _pay_money(node_list, parameters):
             # If diversify_trade is true, keep transferring one unit to each lender until I'm out of money
             elif parameters['diversify_trade'] == True:
                 # As long as I have money, and there are lenders to give money to, keep giving them all 1 money
-                while node.getLiquidity() > 0 and len(lenders) > 0:
+                while node.getLiquidity() > BALANCE and len(lenders) > 0:
                     remove_these = []  # Remove lenders if debt is paid
                     for lender in lenders:
-                        if node.getDebt(lender) > 0 and node.getLiquidity() > 0:
+                        if node.getDebt(lender) > 0 and node.getLiquidity() > BALANCE:
                             node.transfer(lender, DELTA)
                         elif node.getDebt(lender) == 0:
                             remove_these.append(lender)
@@ -288,7 +294,7 @@ def _pay_money(node_list, parameters):
             else:
                 raise Exception("Parameter doesn't exist. (Spelled wrong probably)")
         # If this node is broke, but 'quick_repaying' is on, and we got some money this round, pay back a random debt
-        elif node.getLiquidity() < 0 and parameters['quick_repaying'] and node.delta > 0:
+        elif node.getLiquidity() < BALANCE and parameters['quick_repaying'] and node.delta > 0:
             node.updateBorrowersLenders()
             if len(node.getLenders()) > 0:
                 lender = node.getLenders()[0]
@@ -352,7 +358,8 @@ def _inject_hubs(network):
     hubs = _find_hubs(network)
     for hub in hubs:
         # injection size based on Karel's "policy implementations" file
-        injection = round(hub.capital - np.random.normal(0.44, 0.26) * (network.graph['Ts']))
+#        injection = round(hub.capital - np.random.normal(0.44, 0.26) * (network.graph['Ts']))
+        injection = 10000
         hub.injection += injection
         hub.capital += injection
         hub.liquidity += injection
@@ -366,12 +373,12 @@ def _repay_government_loan(network):
         liquidity = hub.getLiquidity()
         injection = hub.injection
         # If I don't have enough, give all my liquidity back
-        if liquidity > 0 and liquidity < injection:
+        if liquidity > BALANCE and liquidity < injection:
             hub.capital -= liquidity
             hub.liquidity -= liquidity
             hub.injection -= liquidity
         # Else pay off the entire government loan
-        elif liquidity > 0 and liquidity >= injection:
+        elif liquidity > BALANCE and liquidity >= injection:
             hub.capital -= injection
             hub.liquidity -= injection
             hub.injection -= injection            
@@ -384,8 +391,9 @@ def _find_hubs(network):
     degree_sd = _compute_sd_degree(network, average_degree)
     hubs = []
     for node in network.nodes_iter():
-        if network.degree(node) > average_degree + 2 * degree_sd:
-            hubs.append(node)
+#        if network.degree(node) > average_degree + 2 * degree_sd:
+#            hubs.append(node)
+        hubs.append(node)
     return hubs
 
 # Standard deviation of the degree of the network
