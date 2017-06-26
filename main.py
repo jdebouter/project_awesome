@@ -13,28 +13,27 @@ import pickle
         that happen to get a surplus that round, even if they have negative 
         liquidity. False means that they'll only repay if they have positive 
         capital/liquidity 
-    (UNFINISHED)
     transfer_pattern - node_by_node/evenly_distributed. 'node_by_node' means
         that some random node is chosen and all debt/loan is repayed / collected
         until balance is regained. 'evenly_distributed' means that they'll try
         to repay/collect from all borrowers/lenders evenly
         back any money that was lost. 
-    panic_collection - True/False. 'True' means that infected bank collects
-        collects money from all its borrower. 'False' means that bank only collects 
+    panic_collection - True/False. 'True' means that infected bank collects all
+        money from all its borrower. 'False' means that bank only collects 
         back the lost capital
     too_big_to_fail - policy, more description later...'''
 parameters = {"quick_repaying" : True,
-              "diversify_trade" : True,  # I have an untested intuition that this will cause bugs if we set perturbation to 0.75 instead of 1
-              "too_big_to_fail" : False,  # (This one is useless in a regular grid)
-              "panic_collection": True}  
+              "diversify_trade" : True,
+              "too_big_to_fail" : True,  # (This one is useless in a regular grid)
+              "panic_collection": True}
 
 ## Build a network 
 #network = gn.barabasi_albert_network(1000, 100, -4, -6)
 
-#network = gn.mean_field_network(1000, -4, -6)
-#pickle.dump(network, open("MEAN_FIELD_SAVED\mean_field_N1000_tl-4_ts-6.pickle", 'wb'))
-network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N1000_tl-4_ts-6.pickle", "rb" ))
-network.graph['Tl'] = -1
+#network = gn.mean_field_network(100, -4, -6)
+#pickle.dump(network, open("MEAN_FIELD_SAVED\mean_field_N100_tl-4_ts-6.pickle", 'wb'))
+network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-4_ts-6.pickle", "rb" ))
+network.graph['Tl'] = -2
 network.graph['Ts'] = -50
 
 avalanche_sizes = dn.run_simulation(network, 5000, parameters, DEBUG_BOOL = False)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
