@@ -12,12 +12,12 @@ import analyze_network as an
 import numpy as np
 
 UNIT = 100  # Multiply everything by this value
-BALANCE = 0 * UNIT
-DELTA = 1 * UNIT  # This variable is used to implement the third policy. If you set this to 0.75, perturbations will be 75% of one unit of money that the banks use to trade with
+BALANCE = 1 * UNIT
+DELTA = round(1 * UNIT)
 
 ''' Default dictionary of parameters which vary the implementation details '''
 default_parameters = {"quick_repaying" : True,
-                      "diversify_trade" : False,
+                      "diversify_trade" : True,
                       "too_big_to_fail" : False,
                       "panic_collection" : True}
 
@@ -148,7 +148,7 @@ def ask_for_investments(network, parameters):
                     # Choose a neighbor to ask one unit of money from
                     for neighbour in rich_neighbours:
                         if neighbour.getLiquidity() > BALANCE and node.getLiquidity() < BALANCE:
-                            neighbour.transfer(node, UNIT)
+                            neighbour.transfer(node, DELTA)
                         elif neighbour.getLiquidity() <= BALANCE:
                             remove_these.append(neighbour)
                     # Remove lenders whose debt is paid back
@@ -254,7 +254,7 @@ def _get_money(node_list, parameters, infection_happening = False):
                     remove_these = []  # Remove borrowers who have returned their debt
                     for borrower in borrowers:
                         if node.getDebt(borrower) > 0 and node.getLiquidity() < BALANCE:
-                            borrower.transfer(node, UNIT)
+                            borrower.transfer(node, DELTA)
                         elif node.getDebt(borrower) == 0:
                             remove_these.append(borrower)
                     # Remove borrowers whose debt is collected
@@ -286,7 +286,7 @@ def _pay_money(node_list, parameters):
                     remove_these = []  # Remove lenders if debt is paid
                     for lender in lenders:
                         if node.getDebt(lender) > 0 and node.getLiquidity() > BALANCE:
-                            node.transfer(lender, UNIT)
+                            node.transfer(lender, DELTA)
                         elif node.getDebt(lender) == 0:
                             remove_these.append(lender)
                     # Remove lenders whose debt is paid back
@@ -358,7 +358,8 @@ def _inject_hubs(network):
     hubs = _find_hubs(network)
     for hub in hubs:
         # injection size based on Karel's "policy implementations" file
-        injection = round(hub.capital - np.random.normal(0.44, 0.26) * (network.graph['Ts']))
+#        injection = round(hub.capital - np.random.normal(0.44, 0.26) * (network.graph['Ts']))
+        injection = 10000
         hub.injection += injection
         hub.capital += injection
         hub.liquidity += injection
@@ -390,8 +391,9 @@ def _find_hubs(network):
     degree_sd = _compute_sd_degree(network, average_degree)
     hubs = []
     for node in network.nodes_iter():
-        if network.degree(node) > average_degree + 2 * degree_sd:
-            hubs.append(node)
+#        if network.degree(node) > average_degree + 2 * degree_sd:
+#            hubs.append(node)
+        hubs.append(node)
     return hubs
 
 # Standard deviation of the degree of the network
