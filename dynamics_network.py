@@ -12,8 +12,8 @@ import analyze_network as an
 import numpy as np
 
 UNIT = 100  # Multiply everything by this value
-BALANCE = 1 * UNIT
-DELTA = round(1 * UNIT)
+BALANCE = 0 * UNIT
+DELTA = 100
 
 ''' Default dictionary of parameters which vary the implementation details '''
 default_parameters = {"quick_repaying" : True,
@@ -27,6 +27,7 @@ def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
     if parameters is None:
         parameters = default_parameters
     print(parameters)
+    print("Tl is %i and Ts is %i" % (network.graph['Tl'], network.graph['Ts']))
     
     # Multiply the Ts and Tl with UNIT so that we can just input -4/-6 in main, but here there converted appropriately to -400/-600
     network.graph['Tl'] *= UNIT
@@ -94,7 +95,8 @@ FUNCTIONS USED IN run_simulation()
 def perturb(network):
     for node in network.nodes():  # data=True makes it retrieve all extra attributes
         # Randomly generate delta
-        delta = random.choice([-DELTA, DELTA])
+        scale = int((len(node.getNeighbours()))**0.5)
+        delta = random.choice([-DELTA*scale, DELTA*scale])
         # Update liquidity and capital
         node.changeLiquidity(delta)
         node.changeCapital(delta)
@@ -163,16 +165,15 @@ def check_and_propagate_avalanche(network, avalanche_sizes, parameters):
     complete_list_of_bankruptcies = []
 
     if len(bankrupt_banks) > 0:  # If there are bankrupt banks
-        
-        # If we're doing the 'too big to fail' policy, inject hubs with money
-        if parameters['too_big_to_fail']:
-            _inject_hubs(network)
             
         _infect_neighbours(bankrupt_banks)  # Sets lender neighbours of bankrupt banks to infected
         infected_banks = _find_infections(network) # Put all infected banks in a list
         length_old_infections = len(infected_banks)
         
         if len(infected_banks) > 0:  # When there are infections
+            # If we're doing the 'too big to fail' policy, inject hubs with money
+            if parameters['too_big_to_fail']:
+                _inject_hubs(network)
             while True:
                 # Within one iteration, all infected nodes collect money and infect neighbors, and new bankruptcies happen
                 _collect_money_and_spread_infection(infected_banks, parameters)  # Infected nodes collect money from neighbors and infect them
@@ -309,7 +310,8 @@ def _find_bankruptcies(network):
     bankrupt_banks = []
     for node in network.nodes():
         # Check whether this node is bankrupt
-        if node.getCapital() <= network.graph['Ts'] or node.getLiquidity() <= network.graph['Tl']:
+        scale = int((len(node.getNeighbours()))**0.5)
+        if node.getCapital() <= network.graph['Ts']*scale or node.getLiquidity() <= network.graph['Tl']*scale:
             node.setBankruptcy(True)
             bankrupt_banks.append(node)
 #            print "hello", node.getCapital(), node.getLiquidity() 
@@ -358,8 +360,8 @@ def _inject_hubs(network):
     hubs = _find_hubs(network)
     for hub in hubs:
         # injection size based on Karel's "policy implementations" file
-#        injection = round(hub.capital - np.random.normal(0.44, 0.26) * (network.graph['Ts']))
-        injection = 10000
+        injection = round(hub.capital - np.random.normal(0.44, 0.26) * (network.graph['Ts']))
+#        injection = 100 * UNIT
         hub.injection += injection
         hub.capital += injection
         hub.liquidity += injection
@@ -391,9 +393,8 @@ def _find_hubs(network):
     degree_sd = _compute_sd_degree(network, average_degree)
     hubs = []
     for node in network.nodes_iter():
-#        if network.degree(node) > average_degree + 2 * degree_sd:
-#            hubs.append(node)
-        hubs.append(node)
+        if network.degree(node) > average_degree:
+            hubs.append(node)
     return hubs
 
 # Standard deviation of the degree of the network

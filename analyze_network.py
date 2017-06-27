@@ -22,9 +22,12 @@ def print_node_list(node_list):
     print('\n')
 
 ''' Plot a histogram of the avalanche sizes '''
-def histogram_avalanches(avalanche_sizes, num_bins = 50, y_scale = 'log', x_scale = 'log'):
+def histogram_avalanches(avalanche_sizes, avalanche_sizes2 = None, num_bins = 50, y_scale = 'log', x_scale = 'log'):
     results_histogram = np.histogram(avalanche_sizes, bins=num_bins)
     plt.plot(np.linspace(0, max(avalanche_sizes), num_bins), results_histogram[0], '*')
+    if not avalanche_sizes2 is None:
+        results_histogram = np.histogram(avalanche_sizes2, bins=num_bins)
+        plt.plot(np.linspace(0, max(avalanche_sizes2), num_bins), results_histogram[0], '*')
     plt.yscale(y_scale)
     plt.xscale(x_scale)
     plt.xlabel("Avalanche Size")

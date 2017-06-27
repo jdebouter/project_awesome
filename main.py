@@ -24,20 +24,35 @@ import pickle
     too_big_to_fail - policy, more description later...'''
 parameters = {"quick_repaying" : True,
               "diversify_trade" : True,
-              "too_big_to_fail" : True,  # (This one is useless in a regular grid)
+              "too_big_to_fail" : False,  # (This one is useless in a regular grid)
               "panic_collection": True}
 
 ## Build a network 
 #network = gn.barabasi_albert_network(1000, 100, -4, -6)
 
+#network = gn.regular_network(2, 2, -4, -6)
+#node0 = network.nodes()[0]
+#node0.capital = -100
+#node0.liquidity = -100
+#
+#avalanche_sizes = []
+#avalanche_sizes = dn.check_and_propagate_avalanche(network, avalanche_sizes, parameters)
+
 #network = gn.mean_field_network(100, -4, -6)
 #pickle.dump(network, open("MEAN_FIELD_SAVED\mean_field_N100_tl-4_ts-6.pickle", 'wb'))
 network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-4_ts-6.pickle", "rb" ))
 network.graph['Tl'] = -2
-network.graph['Ts'] = -50
+network.graph['Ts'] = -16
 
-avalanche_sizes = dn.run_simulation(network, 5000, parameters, DEBUG_BOOL = False)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
+avalanche_sizes = dn.run_simulation(network, 50000, parameters, DEBUG_BOOL = False)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
 
-## Plot the distribution of avalanches
-an.histogram_avalanches(avalanche_sizes, num_bins = 100, y_scale='log', x_scale='linear')
-an.histogram_avalanches(avalanche_sizes, num_bins = 100, y_scale='log', x_scale='log')
+#network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-4_ts-6.pickle", "rb" ))
+#network.graph['Tl'] = -1
+#network.graph['Ts'] = -50
+avalanche_sizes2 = None
+
+#avalanche_sizes2 = dn.run_simulation(network, 5000, parameters, DEBUG_BOOL = False)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
+
+### Plot the distribution of avalanches
+an.histogram_avalanches(avalanche_sizes, avalanche_sizes2, num_bins = 100, y_scale='log', x_scale='linear')
+an.histogram_avalanches(avalanche_sizes, avalanche_sizes2, num_bins = 100, y_scale='log', x_scale='log')
