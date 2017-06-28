@@ -19,40 +19,38 @@ import pickle
         to repay/collect from all borrowers/lenders evenly
         back any money that was lost. 
     panic_collection - True/False. 'True' means that infected bank collects all
-        money from all its borrower. 'False' means that bank only collects 
+        money from all its borrower. 'False' means that bank only collects
         back the lost capital
     too_big_to_fail - policy, more description later...'''
 parameters = {"quick_repaying" : True,
               "diversify_trade" : True,
               "too_big_to_fail" : False,  # (This one is useless in a regular grid)
-              "panic_collection": True}
+              "panic_collection": True,
+              "BALANCE" : 0}
 
-
-parameters['sd'] = 1
-parameters['repay_fraction'] = 1
-network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-4_ts-6.pickle", "rb" ))
+#pickle.dump(network, open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", 'wb'))
+network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", "rb" ))
 network.graph['hubs'] = dn._find_hubs(network)
 print("hubs: %i" % len(network.graph['hubs']))
+hubs = network.graph['hubs']
+network.graph['Tl'], network.graph['Ts'] = -2, -40
 
-avalanche_sizes, avalanche_sizes2 = [], []
+UNIT = 100
+network.graph['Tl'] *= UNIT
+network.graph['Ts'] *= UNIT
 
-for i in range(1):
-    network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-4_ts-6.pickle", "rb" ))
-    network.graph['Tl'] = -6
-    network.graph['Ts'] = -10
-    parameters['too_big_to_fail'] = False    
-    
-    avalanche_sizes += dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = True)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
-    
-    network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-4_ts-6.pickle", "rb" ))
-    network.graph['Tl'] = -6
-    network.graph['Ts'] = -10
-    parameters['too_big_to_fail'] = False
-#    parameters['less_risk'] = True
-    
-    #avalanche_sizes2 = None
-    avalanche_sizes2 += dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = True)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
+for i in range(300):
+    dn.perturb(network)
 
-### Plot the distribution of avalanches
-an.histogram_avalanches(avalanche_sizes, avalanche_sizes2, num_bins = 100, x_scale='linear', labels = [r"$without injections$", r"$with injections$"])
-an.histogram_avalanches(avalanche_sizes, avalanche_sizes2, num_bins = 100, x_scale='log', labels = [r"$without injections$", r"$with injections$"])
+dn.ask_for_investments(network, parameters)
+
+an.print_node_list(hubs)
+
+dn.check_and_propagate_avalanche(network, [], parameters)
+dn.debug(network)
+
+#an.print_node_list(hubs)
+
+#dn._inject_hubs(network, [])
+#
+#an.print_node_list(hubs)

@@ -158,8 +158,8 @@ def _mean_field_graph(N, Tl, Ts, c, m):
     lending_freq = _compute_lending_freq(credit_ratings, m)
     # Use the credit ratings and lending_freq to add edges.
     w_t = c * min(credit_ratings) * max(credit_ratings)
-    for i in range(N):
-        for j in range(i, N):
+    for i in range(N):  # Maybe N-1
+        for j in range(i+1, N):
             if lending_freq[i, j] >= w_t:
                 G.add_edge(i, j)
     return _replaceNodesWithBankObjects(G, Tl, Ts)

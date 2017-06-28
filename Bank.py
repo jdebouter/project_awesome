@@ -51,15 +51,18 @@ class Bank(object):
         return self.bankruptcy
     
     def getBorrowers(self):
+        self.updateBorrowersLenders()
         return self.borrowers
     
     def getLenders(self):
+        self.updateBorrowersLenders()
         return self.lenders
     
     def getDebt(self, neighbour):
         return abs(self.neighbours[neighbour])
     
     def getRichNeighbours(self):
+        self.updateRichNeighbours()
         return self.rich_neighbours
 
     def getMoneyLost(self):
