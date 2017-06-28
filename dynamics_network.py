@@ -95,7 +95,8 @@ FUNCTIONS USED IN run_simulation()
 def perturb(network):
     for node in network.nodes():  # data=True makes it retrieve all extra attributes
         # Randomly generate delta
-        scale = int((len(node.getNeighbours()))**0.5)
+#        scale = int((len(node.getNeighbours()))**0.5)
+        scale = 1
         delta = random.choice([-DELTA*scale, DELTA*scale])
         # Update liquidity and capital
         node.changeLiquidity(delta)
@@ -310,7 +311,8 @@ def _find_bankruptcies(network):
     bankrupt_banks = []
     for node in network.nodes():
         # Check whether this node is bankrupt
-        scale = int((len(node.getNeighbours()))**0.5)
+#        scale = int((len(node.getNeighbours()))**0.5)
+        scale = 1
         if node.getCapital() <= network.graph['Ts']*scale or node.getLiquidity() <= network.graph['Tl']*scale:
             node.setBankruptcy(True)
             bankrupt_banks.append(node)
