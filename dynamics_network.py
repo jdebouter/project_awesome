@@ -38,8 +38,13 @@ def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
     network.graph['Ts'] *= UNIT
     print(network.graph['Ts'])
     
+    network.graph['hubs'] = _find_hubs(network)
+    
     avalanche_sizes = []  # list of the sizes of all avalanches
     # Simulation kernel
+    
+    diff_init_final = 0
+    
     for t in range(T):
         if t % 50 == 0:
             print("ITERATION %i" % t)
@@ -60,13 +65,16 @@ def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
         ask_for_investments(network, parameters)
     
         # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes 
-        check_and_propagate_avalanche(network, avalanche_sizes, parameters)
+        diff_init_final += check_and_propagate_avalanche(network, avalanche_sizes, parameters)
         
         # just checking the correctness of the program:
         if DEBUG_BOOL:
 #            an.print_network(network)
             debug(network)
         
+    print("sum of differences between initial and final number of banks for each avalanche: %i" % diff_init_final)
+    print("sum of all avalanches : %i" % sum(avalanche_sizes))
+    
     # Return the list of avalanche sizes
     return avalanche_sizes
 
@@ -147,11 +155,16 @@ def check_and_propagate_avalanche(network, avalanche_sizes, parameters):
     bankrupt_banks = _find_bankruptcies(network)  # list of bankrupt banks is a list of names
     complete_list_of_bankruptcies = []
     
+    init_bankrupt = len(bankrupt_banks)
+#    if init_bankrupt > 0:
+#        print("initially bankrupt banks: %i" % init_bankrupt, end=" ")
+    final_bankrupt = init_bankrupt
+    
     if len(bankrupt_banks) > 0:  # If there are bankrupt banks
         if parameters['too_big_to_fail']:
             _inject_hubs(network, bankrupt_banks)
             
-        _infect_neighbours(bankrupt_banks)  # Sets lender neighbours of bankrupt banks to infected
+        _infect_neighbours(bankrupt_banks, parameters)  # Sets lender neighbours of bankrupt banks to infected
         infected_banks = _find_infections(network) # Put all infected banks in a list
         length_old_infections = len(infected_banks)
         
@@ -159,10 +172,10 @@ def check_and_propagate_avalanche(network, avalanche_sizes, parameters):
             # If we're doing the 'too big to fail' policy, inject hubs with money
             while True:
                 # Within one iteration, all infected nodes collect money and infect neighbors, and new bankruptcies happen
-                if not parameters['no_infections']:
+                if parameters['infections_on']:
                     _collect_money_and_spread_infection(infected_banks, parameters)  # Infected nodes collect money from neighbors and infect them
-                bankrupt_banks = _find_bankruptcies(network)  # Find any new bankruptcies                
-                _infect_neighbours(bankrupt_banks)  # Make neighbors of new bankruptcies also infected
+                bankrupt_banks = _find_bankruptcies(network)  # Find any new bankruptcies
+                _infect_neighbours(bankrupt_banks, parameters)  # Make neighbors of new bankruptcies also infected
                 infected_banks = _find_infections(network)  # Make list of all currently infected
                 complete_list_of_bankruptcies.append(infected_banks)
 
@@ -172,12 +185,17 @@ def check_and_propagate_avalanche(network, avalanche_sizes, parameters):
                     avalanche_sizes.append(length_new_infections)
                     _cure_all(infected_banks)  # Cures infected banks
                     _reset_all(bankrupt_banks)  # resets every bank
+                    final_bankrupt = len(bankrupt_banks)
                     break
                 else:
                     length_old_infections = length_new_infections
         else:
             _reset_all(bankrupt_banks)
-    return np.ndarray.flatten(np.array(complete_list_of_bankruptcies))
+    
+#    if final_bankrupt > 0:        
+#        print("final # of bankrupt banks: %i" % final_bankrupt)
+    return final_bankrupt - init_bankrupt
+#    return np.ndarray.flatten(np.array(complete_list_of_bankruptcies))
 
 ''' =========================================================================== 
 HELPER FUNCTIONS
@@ -226,12 +244,12 @@ def _get_money(node_list, parameters, infection_happening = False):
                     if money_needed >= debt or infection_happening:
                         borrower.transfer(node, debt) # 
                         # If this node is infected, infected the borrowing neighbour too
-                        if infection_happening:
+                        if infection_happening and not (parameters['too_big_to_spread'] and borrower.hub):
                             borrower.infect()
                     # Else take only the amount back we need to regain balance (liquidity = 0)
                     else:
                         node.transfer(borrower, -abs(money_needed)) 
-                        if infection_happening:
+                        if infection_happening and not (parameters['too_big_to_spread'] and borrower.hub):
                             borrower.infect()
                         break
             # If diversify_trade is true, distribute loan collecting evenly
@@ -301,14 +319,17 @@ def _find_bankruptcies(network):
     return bankrupt_banks
 
 '''Helper function for creating infections'''
-def _infect_neighbours(bankrupt_banks):
-    
+def _infect_neighbours(bankrupt_banks, parameters):
+
     for bank in bankrupt_banks:
-        lenders = bank.getLenders()
-#        _debug2(network)
-#        print "hello", bank.getTotalDebt()
-        for lender in lenders:
-            lender.infect(bank)
+        if (parameters['too_big_to_spread'] and bank.hub):
+            lenders = bank.getLenders()
+            for lender in lenders:
+                lender.loseMoney(bank)
+        else:
+            lenders = bank.getLenders()
+            for lender in lenders:
+                lender.infect(bank)
 
 '''Helper function to find infections'''
 def _find_infections(network):
@@ -378,9 +399,11 @@ def _find_hubs(network):
     degree_sd = _compute_sd_degree(network, average_degree)
     hubs = []
     for node in network.nodes_iter():
-        if network.degree(node) > average_degree:
+        if network.degree(node) > average_degree + 0 * degree_sd:
             hubs.append(node)
+            node.hub = True  # WEDNESDAYEVENING
     return hubs
+#    return [network.nodes()[0]]
 
 # Standard deviation of the degree of the network
 def _compute_sd_degree(network, average_degree):

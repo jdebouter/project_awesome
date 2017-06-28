@@ -25,9 +25,10 @@ import pickle
 parameters = {"quick_repaying" : True,
               "diversify_trade" : True,
               "too_big_to_fail" : False,  # (This one is useless in a regular grid)
+              "too_big_to_spread": False,
               "panic_collection": True,
               "BALANCE" : 0,
-              "no_infections" : False}
+              "infections_on": True}
 
 #pickle.dump(network, open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", 'wb'))
 network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", "rb" ))
@@ -39,24 +40,26 @@ avalanche_sizes, avalanche_sizes2 = [], []
 for i in range(10):
     network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", "rb" ))
 #    network = gn.mean_field_network(4, -2, -40)
-    network.graph['Tl'] = -6
+    network.graph['Tl'] = -2
     network.graph['Ts'] = -40
-    parameters['no_infections'] = False    
+    parameters['too_big_to_spread'] = False
+#    parameters['infections_on'] = False    
 #    parameters['BALANCE'] = 0
     
-    avalanche_sizes += dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = False)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
+    avalanche_sizes += dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = True)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
     
     network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", "rb" ))
 #    network = gn.mean_field_network(4, -2, -40)
-    network.graph['Tl'] = -6
+    network.graph['Tl'] = -2
     network.graph['Ts'] = -40
-    parameters['no_infections'] = False
+    parameters['too_big_to_spread'] = True
+#    parameters['no_infections'] = False
 #    parameters['less_risk'] = True
 #    parameters['BALANCE'] = 100
     
     #avalanche_sizes2 = None
-    avalanche_sizes2 += dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = False)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
+    avalanche_sizes2 += dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = True)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
 
 ### Plot the distribution of avalanches
-an.histogram_avalanches(avalanche_sizes, avalanche_sizes2, num_bins = 100, x_scale='linear', labels = ["l1", "l2"])
+#an.histogram_avalanches(avalanche_sizes, avalanche_sizes2, num_bins = 100, x_scale='linear', labels = ["l1", "l2"])
 an.histogram_avalanches(avalanche_sizes, avalanche_sizes2, num_bins = 100, x_scale='log', labels = ["Infections on", "Infections off"])

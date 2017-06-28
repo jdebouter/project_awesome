@@ -29,6 +29,7 @@ def histogram_avalanches(avalanche_sizes, avalanche_sizes2 = None, num_bins = 50
     mpl.rc('font', **font)
     plt.figure(figsize=(10,6))
     results_histogram = np.histogram(avalanche_sizes, bins=num_bins)
+    print(avalanche_sizes)
     plt.plot(np.linspace(0, max(avalanche_sizes), num_bins), results_histogram[0], '*', color = 'blue', label = labels[0])
     print("1st sim: %i banks defaulted in total" % sum(avalanche_sizes))
     if not avalanche_sizes2 is None:

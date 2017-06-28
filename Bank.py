@@ -13,6 +13,10 @@ BALANCE = dn.BALANCE
 # Definition of a Banking Node 
 
 class Bank(object):
+    hub = False
+    delta = 0
+    injection = 0
+    
     def __init__(self, node, amount_inhand, amount_withothers = []):
         self.label = node
         self.capital = sum(amount_withothers) + amount_inhand
@@ -20,15 +24,16 @@ class Bank(object):
         self.bankruptcy = False
         self.infection = False
         self.neighbours = {}
-        self.delta = 0
-        self.injection = 0
         self.rich_neighbours = []
         self.money_lost = 0
 
     ''' GET FUNCTIONS '''
+    def getTest(self):
+        return self.test
+    
     def getInfection(self):
         return self.infection
-            
+    
     def getLabel(self):
         return self.label
     
