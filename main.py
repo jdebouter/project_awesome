@@ -26,31 +26,37 @@ parameters = {"quick_repaying" : True,
               "diversify_trade" : True,
               "too_big_to_fail" : False,  # (This one is useless in a regular grid)
               "panic_collection": True,
-              "BALANCE" : 0}
+              "BALANCE" : 0,
+              "no_infections" : False}
 
 #pickle.dump(network, open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", 'wb'))
 network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", "rb" ))
 network.graph['hubs'] = dn._find_hubs(network)
 print("hubs: %i" % len(network.graph['hubs']))
-hubs = network.graph['hubs']
-network.graph['Tl'], network.graph['Ts'] = -2, -40
 
-UNIT = 100
-network.graph['Tl'] *= UNIT
-network.graph['Ts'] *= UNIT
+avalanche_sizes, avalanche_sizes2 = [], []
 
-for i in range(300):
-    dn.perturb(network)
+for i in range(10):
+    network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", "rb" ))
+#    network = gn.mean_field_network(4, -2, -40)
+    network.graph['Tl'] = -6
+    network.graph['Ts'] = -40
+    parameters['no_infections'] = False    
+#    parameters['BALANCE'] = 0
+    
+    avalanche_sizes += dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = False)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
+    
+    network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", "rb" ))
+#    network = gn.mean_field_network(4, -2, -40)
+    network.graph['Tl'] = -6
+    network.graph['Ts'] = -40
+    parameters['no_infections'] = False
+#    parameters['less_risk'] = True
+#    parameters['BALANCE'] = 100
+    
+    #avalanche_sizes2 = None
+    avalanche_sizes2 += dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = False)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
 
-dn.ask_for_investments(network, parameters)
-
-an.print_node_list(hubs)
-
-dn.check_and_propagate_avalanche(network, [], parameters)
-dn.debug(network)
-
-#an.print_node_list(hubs)
-
-#dn._inject_hubs(network, [])
-#
-#an.print_node_list(hubs)
+### Plot the distribution of avalanches
+an.histogram_avalanches(avalanche_sizes, avalanche_sizes2, num_bins = 100, x_scale='linear', labels = ["l1", "l2"])
+an.histogram_avalanches(avalanche_sizes, avalanche_sizes2, num_bins = 100, x_scale='log', labels = ["Infections on", "Infections off"])

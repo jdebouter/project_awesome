@@ -146,7 +146,7 @@ def check_and_propagate_avalanche(network, avalanche_sizes, parameters):
     # If any bank has gone bankrupt, start an infection. Also get a list of bankrupt banks
     bankrupt_banks = _find_bankruptcies(network)  # list of bankrupt banks is a list of names
     complete_list_of_bankruptcies = []
-
+    
     if len(bankrupt_banks) > 0:  # If there are bankrupt banks
         if parameters['too_big_to_fail']:
             _inject_hubs(network, bankrupt_banks)
@@ -159,7 +159,8 @@ def check_and_propagate_avalanche(network, avalanche_sizes, parameters):
             # If we're doing the 'too big to fail' policy, inject hubs with money
             while True:
                 # Within one iteration, all infected nodes collect money and infect neighbors, and new bankruptcies happen
-                _collect_money_and_spread_infection(infected_banks, parameters)  # Infected nodes collect money from neighbors and infect them
+                if not parameters['no_infections']:
+                    _collect_money_and_spread_infection(infected_banks, parameters)  # Infected nodes collect money from neighbors and infect them
                 bankrupt_banks = _find_bankruptcies(network)  # Find any new bankruptcies                
                 _infect_neighbours(bankrupt_banks)  # Make neighbors of new bankruptcies also infected
                 infected_banks = _find_infections(network)  # Make list of all currently infected
@@ -297,7 +298,6 @@ def _find_bankruptcies(network):
         if node.getCapital() <= network.graph['Ts']*scale or node.getLiquidity() <= network.graph['Tl']*scale:
             node.setBankruptcy(True)
             bankrupt_banks.append(node)
-#            print "hello", node.getCapital(), node.getLiquidity() 
     return bankrupt_banks
 
 '''Helper function for creating infections'''
