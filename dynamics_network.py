@@ -163,8 +163,8 @@ def check_and_propagate_avalanche(network, avalanche_sizes, parameters):
     if len(bankrupt_banks) > 0:  # If there are bankrupt banks
         if parameters['too_big_to_fail']:
             _inject_hubs(network, bankrupt_banks)
-            
-        _infect_neighbours(bankrupt_banks, parameters)  # Sets lender neighbours of bankrupt banks to infected
+        
+        _infect_neighbours(bankrupt_banks, parameters)  # Sets lender neighbours of bankrupt banks to infected       
         infected_banks = _find_infections(network) # Put all infected banks in a list
         length_old_infections = len(infected_banks)
         
@@ -360,17 +360,36 @@ TOO BIG TO FAIL
 
 # Inject all hubs with a temporary government loan
 def _inject_hubs(network, bankrupt_banks):
+#    print("start")
     hubs = _find_hubs(network)
-    hubs = [h for h in hubs if not h in bankrupt_banks]
+#    hubs = [h for h in hubs if not h in bankrupt_banks]
     for hub in hubs:
+#        print(hub.capital, end=", ")
+#        print(hub.liquidity, end=", ")
+#        print("", end = "[")
+#        for n in hub.neighbours:
+#            if hub.neighbours[n] < 0:
+#                print(" %d to %d " % (hub.neighbours[n], n.getLabel()), end=", ")
+#        print("", end = "]")
+#        print(hub.getTotalDebt(), end=" --- " )
+#        print(hub.injection, end=", ")
         # injection size based on Karel's "policy implementations" file
 #        print(hub.capital)
 #        print(network.graph['Ts'])
-        injection = int(round(np.random.normal(0.44, 0.26) * (hub.capital - network.graph['Ts']), -2))
+        injection = max(0, int(round(np.random.normal(0.44, 0.26) * (hub.capital - network.graph['Ts']), -2)))
+#        print(injection, end=" --- ")
 #        injection = 100 * UNIT
         hub.injection += injection
         hub.capital += injection
         hub.liquidity += injection
+#        print(hub.capital, end=", ")
+#        print(hub.liquidity, end=", ")
+#        print("", end = "[")
+#        for n in hub.neighbours:
+#            if hub.neighbours[n] < 0:
+#                print(" %d to %d " % (hub.neighbours[n], n.getLabel()), end=", ")
+#        print("", end = "] ")
+#        print(hub.getTotalDebt())
     # Add the hubs to the network attributes so that we can easily iterate over them later
     network.graph['hubs_with_loan'] = hubs
 

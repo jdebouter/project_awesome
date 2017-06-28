@@ -41,24 +41,26 @@ for i in range(10):
     network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", "rb" ))
 #    network = gn.mean_field_network(4, -2, -40)
     network.graph['Tl'] = -2
-    network.graph['Ts'] = -40
-    parameters['too_big_to_spread'] = False
+    network.graph['Ts'] = -3
+    parameters['too_big_to_fail'] = False
+    parameters["too_big_to_spread"] = False
 #    parameters['infections_on'] = False    
 #    parameters['BALANCE'] = 0
     
-    avalanche_sizes += dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = True)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
+    avalanche_sizes += dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = False)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
     
     network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", "rb" ))
 #    network = gn.mean_field_network(4, -2, -40)
     network.graph['Tl'] = -2
-    network.graph['Ts'] = -40
-    parameters['too_big_to_spread'] = True
+    network.graph['Ts'] = -3
+    parameters['too_big_to_fail'] = True
+    parameters["too_big_to_spread"] = True
 #    parameters['no_infections'] = False
 #    parameters['less_risk'] = True
 #    parameters['BALANCE'] = 100
     
     #avalanche_sizes2 = None
-    avalanche_sizes2 += dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = True)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
+    avalanche_sizes2 += dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = False)  # TURN OFF DEBUG_BOOL FOR SPEED (BUT TURN IT ON EVERY NOW AND THEN)
 
 ### Plot the distribution of avalanches
 #an.histogram_avalanches(avalanche_sizes, avalanche_sizes2, num_bins = 100, x_scale='linear', labels = ["l1", "l2"])

@@ -16,6 +16,7 @@ class Bank(object):
     hub = False
     delta = 0
     injection = 0
+    neighbours = {}
     
     def __init__(self, node, amount_inhand, amount_withothers = []):
         self.label = node
@@ -23,7 +24,6 @@ class Bank(object):
         self.liquidity = amount_inhand
         self.bankruptcy = False
         self.infection = False
-        self.neighbours = {}
         self.rich_neighbours = []
         self.money_lost = 0
 
