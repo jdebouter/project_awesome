@@ -15,31 +15,29 @@ UNIT = 100  # Multiply everything by this value
 BALANCE = 0 * UNIT
 DELTA = 100
 
-''' Default dictionary of parameters which vary the implementation details '''
-default_parameters = {"quick_repaying" : True,
-                      "diversify_trade" : True,
-                      "too_big_to_fail" : False,
-                      "panic_collection" : True}
 
 ''' Run the simulation for T iterations '''
 def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
-    # If no parameters were input, just use the default parameters
-    if parameters is None:
-        parameters = default_parameters
-    print(parameters)
-    print("Tl is %i and Ts is %i" % (network.graph['Tl'], network.graph['Ts']))
+#    print(parameters)
+#    print("Tl is %i and Ts is %i" % (network.graph['Tl'], network.graph['Ts']))
     
     # Multiply the Ts and Tl with UNIT so that we can just input -4/-6 in main, but here there converted appropriately to -400/-600
     network.graph['Tl'] *= UNIT
     network.graph['Ts'] *= UNIT
     
+#    DELTA = parameters['DELTA']  
+    if parameters['too_big_to_fail']:
+        network.graph['hubs'] = _find_hubs(network, parameters)
+#        print("number of hubs: %i" % len(network.graph['hubs']))
+
     avalanche_sizes = []  # list of the sizes of all avalanches
     # Simulation kernel
     for t in range(T):
-        if t % 50 == 0:
-            print("ITERATION %i" % t)
+#        if t % 50 == 0:
+#            print("ITERATION %i" % t)
         # Generate random perturbations in the liquidity for each node
-        perturb(network)
+
+        perturb(network, DELTA)
 
         # If the "too big to fail" policy is being implemented, these nodes should check if they can repay their government loan
         if parameters['too_big_to_fail']:
@@ -65,37 +63,15 @@ def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
     # Return the list of avalanche sizes
     return avalanche_sizes
 
-''' Run the simulation for 1 iteration and return the list of defaulted banks'''
-def step_simulation(network, parameters = None):
-    # If no parameters were input, just use the default parameters
-    if parameters is None:
-        parameters = default_parameters
-    
-    avalanche_sizes = []  # list of the sizes of all avalanches
-    # Generate random perturbations in the liquidity for each node
-    perturb(network)
-
-    # Banks with surplus liquidity try to repay debts
-    repay_debts(network, parameters)
- 
-    # Banks with a deficit try to collect loans back
-    collect_loans(network)
-  
-    # Banks with surplus liquidity try to invest in neighbors with negative liquidity 
-    invest_surplus_liquidity(network, parameters)
-    
-    # Check for bankruptcy and propagate infection/failures. If an avalanche happens, its size is appended to avalanche_sizes 
-    return check_and_propagate_avalanche(network, avalanche_sizes, parameters)
-
 ''' =========================================================================== 
 FUNCTIONS USED IN run_simulation()
 =========================================================================== '''
 
 ''' Each bank gets or loses some capital randomly (delta=1 v delta=-1) '''
-def perturb(network):
+def perturb(network, DELTA):
     for node in network.nodes():  # data=True makes it retrieve all extra attributes
         # Randomly generate delta
-        scale = int((len(node.getNeighbours()))**0.5)
+        scale = 1
         delta = random.choice([-DELTA*scale, DELTA*scale])
         # Update liquidity and capital
         node.changeLiquidity(delta)
@@ -166,19 +142,21 @@ def check_and_propagate_avalanche(network, avalanche_sizes, parameters):
 
     if len(bankrupt_banks) > 0:  # If there are bankrupt banks
             
-        _infect_neighbours(bankrupt_banks)  # Sets lender neighbours of bankrupt banks to infected
+        _infect_neighbours(bankrupt_banks, parameters, network)  # Sets lender neighbours of bankrupt banks to infected
         infected_banks = _find_infections(network) # Put all infected banks in a list
         length_old_infections = len(infected_banks)
+
+        if parameters['too_big_to_fail']:
+            infected_banks = _inject_hubs(network, parameters, infected_banks)
         
         if len(infected_banks) > 0:  # When there are infections
             # If we're doing the 'too big to fail' policy, inject hubs with money
-            if parameters['too_big_to_fail']:
-                _inject_hubs(network)
+
             while True:
                 # Within one iteration, all infected nodes collect money and infect neighbors, and new bankruptcies happen
-                _collect_money_and_spread_infection(infected_banks, parameters)  # Infected nodes collect money from neighbors and infect them
+                _collect_money_and_spread_infection(infected_banks, parameters, network)  # Infected nodes collect money from neighbors and infect them
                 bankrupt_banks = _find_bankruptcies(network)  # Find any new bankruptcies                
-                _infect_neighbours(bankrupt_banks)  # Make neighbors of new bankruptcies also infected
+                _infect_neighbours(bankrupt_banks, parameters, network)  # Make neighbors of new bankruptcies also infected
                 infected_banks = _find_infections(network)  # Make list of all currently infected
                 complete_list_of_bankruptcies.append(infected_banks)
 
@@ -218,7 +196,7 @@ def debug2(network):
         node.lenderBorrowerSame()
 
 ''' Helper function to iterate through a given node list and retrieve loaned money from neighbours '''
-def _get_money(node_list, parameters, infection_happening = False):
+def _get_money(node_list, parameters, infection_happening = False, network = None):
     for node in node_list:
         # Collect money from borrowers if I have a deficit or if an infection is happening
         if node.getLiquidity() < 0 or infection_happening:
@@ -247,7 +225,8 @@ def _get_money(node_list, parameters, infection_happening = False):
                     else:
                         node.transfer(borrower, -abs(money_needed)) 
                         if infection_happening:
-                            borrower.infect()
+                            if not (parameters['too_big_to_fail'] and borrower in network.graph['hubs']):
+                                borrower.infect()
                         break
             # If diversify_trade is true, distribute loan collecting evenly
             elif parameters['diversify_trade'] == True:
@@ -310,15 +289,15 @@ def _find_bankruptcies(network):
     bankrupt_banks = []
     for node in network.nodes():
         # Check whether this node is bankrupt
-        scale = int((len(node.getNeighbours()))**0.5)
+        scale = 1
         if node.getCapital() <= network.graph['Ts']*scale or node.getLiquidity() <= network.graph['Tl']*scale:
             node.setBankruptcy(True)
             bankrupt_banks.append(node)
 #            print "hello", node.getCapital(), node.getLiquidity() 
     return bankrupt_banks
 
-'''Helper function for creating infections'''
-def _infect_neighbours(bankrupt_banks):
+''' Helper function for creating infections '''
+def _infect_neighbours(bankrupt_banks, parameters, network):
     
     for bank in bankrupt_banks:
         bank.updateBorrowersLenders()
@@ -326,9 +305,10 @@ def _infect_neighbours(bankrupt_banks):
 #        _debug2(network)
 #        print "hello", bank.getTotalDebt()
         for lender in lenders:
-            lender.infect(bank)
+            if not (parameters['too_big_to_fail'] and lender in network.graph['hubs']):  # EXTRA, trying this out now
+                lender.infect(bank)
 
-'''Helper function to find infections'''
+''' Helper function to find infections '''
 def _find_infections(network):
     infected_banks = []
     for bank in network.nodes():
@@ -336,12 +316,12 @@ def _find_infections(network):
             infected_banks.append(bank)
     return infected_banks
 
-'''Helper function to cure infections'''
-def _collect_money_and_spread_infection(infected_banks, parameters):
-    _get_money(infected_banks, parameters, infection_happening = True)
+''' Helper function to cure infections '''
+def _collect_money_and_spread_infection(infected_banks, parameters, network):
+    _get_money(infected_banks, parameters, infection_happening = True, network = network)
 #    _pay_money(infected_banks)
                     
-'''Helper function to cure Banks'''
+''' Helper function to cure Banks '''
 def _cure_all(banks):
     for bank in banks:
         bank.cure()
@@ -356,17 +336,20 @@ TOO BIG TO FAIL
 =========================================================================== '''
 
 # Inject all hubs with a temporary government loan
-def _inject_hubs(network):
-    hubs = _find_hubs(network)
+def _inject_hubs(network, parameters, infected_banks):
+    hubs = network.graph['hubs']
     for hub in hubs:
         # injection size based on Karel's "policy implementations" file
-        injection = round(hub.capital - np.random.normal(0.44, 0.26) * (network.graph['Ts']))
-#        injection = 100 * UNIT
-        hub.injection += injection
+        injection = round(np.random.normal(0.44, 0.26) * (hub.capital - network.graph['Ts']))
+        hub.injection += round(parameters['repay_fraction'] * injection)  # Only pay back fraction of loan?
         hub.capital += injection
         hub.liquidity += injection
+        # EXTRA TEST
+        hub.infection = False
     # Add the hubs to the network attributes so that we can easily iterate over them later
     network.graph['hubs_with_loan'] = hubs
+    # EXTRA TEST
+    return [bank for bank in infected_banks if not bank in hubs]
 
 # For all well-connected banks, hubs, that got an injection, repay this loan back if possible
 def _repay_government_loan(network):
@@ -388,12 +371,12 @@ def _repay_government_loan(network):
             network.graph['hubs_with_loan'].remove(hub)
 
 # Return a list of all well-connected banks / hubs
-def _find_hubs(network):
+def _find_hubs(network, parameters):
     average_degree = _compute_average_degree(network)
     degree_sd = _compute_sd_degree(network, average_degree)
     hubs = []
     for node in network.nodes_iter():
-        if network.degree(node) > average_degree:
+        if network.degree(node) > average_degree + parameters['sd'] * degree_sd:
             hubs.append(node)
     return hubs
 

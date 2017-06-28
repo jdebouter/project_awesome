@@ -155,18 +155,18 @@ class Bank(object):
 
     ''' Set infection to true. This function is called for all neighbors of a bankrupt bank,
         so '''
-    def infect(self, bank = None):
+    def infect(self, borrower = None):
         self.infection = True
         
-        if not bank is None:  # When this function is called for neighbours of an infected (not bankrupt) bank, the bank argument isn't set, so the neighbour doesn't lose money. When this function is called for neighbours of bankrupt banks, bank is set to something, and the neighbours lose capital appropriately
-            self.loseMoney(bank)
+        if not borrower is None:  # When this function is called for neighbours of an infected (not bankrupt) bank, the bank argument isn't set, so the neighbour doesn't lose money. When this function is called for neighbours of bankrupt banks, bank is set to something, and the neighbours lose capital appropriately
+            self.loseMoney(borrower)
 
     ''' DESCRIPTION '''
-    def loseMoney(self, bank):
-        self.money_lost += self.getDebt(bank)
-        self.changeCapital(-self.getDebt(bank))
-        bank.changeDebt(self, self.getDebt(bank))
-        self.changeDebt(bank, -self.getDebt(bank))
+    def loseMoney(self, borrower):
+        self.money_lost += self.getDebt(borrower)
+        self.changeCapital(-self.getDebt(borrower))
+        borrower.changeDebt(self, self.getDebt(borrower))
+        self.changeDebt(borrower, -self.getDebt(borrower))
          
                 
     ''' Reset all attributes of a bank (used after bankruptcy avalanche is over) '''
