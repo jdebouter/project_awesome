@@ -55,7 +55,7 @@ for param in PARAMETER_VALUES:
     m_vals = []
     c_vals = []
     parameters[PARAMETER] = param
-    for i in range(5):
+    for i in range(50):
         network = pickle.load(open("../MEAN_FIELD_SAVED/mean_field_N100_tl-2_ts-40.pickle", "rb" ))
         network.graph['Tl'] = -2
         network.graph['Ts'] = -40
