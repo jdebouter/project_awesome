@@ -31,7 +31,8 @@ parameters = {"quick_repaying" : True,
               "diversify_trade" : True,
               "too_big_to_fail" : False,  # (This one is useless in a regular grid)
               "too_big_to_spread": False,
-              "panic_collection": True,
+              "panic_mode": True,
+              "panic_reduced" : False,
               "BALANCE" : 0,
               "DELTA" : 1,
               "infections_on": True}
