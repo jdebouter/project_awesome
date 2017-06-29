@@ -25,7 +25,9 @@ default_parameters = {"quick_repaying" : True,
 def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
     global BALANCE
     BALANCE = parameters['BALANCE']
-    print(BALANCE)
+    if BALANCE < 100:
+        BALANCE *= UNIT
+    print("BALANCE: %i" % BALANCE)
     
     # If no parameters were input, just use the default parameters
     if parameters is None:
@@ -36,7 +38,6 @@ def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
     # Multiply the Ts and Tl with UNIT so that we can just input -4/-6 in main, but here there converted appropriately to -400/-600
     network.graph['Tl'] *= UNIT
     network.graph['Ts'] *= UNIT
-    print(network.graph['Ts'])
     
     network.graph['hubs'] = _find_hubs(network)
     
