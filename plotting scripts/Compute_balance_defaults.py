@@ -3,7 +3,7 @@
 This script is where we adjust parameters and run the model
 =========================================================================== """
 import sys
-sys.path.insert(0, '/Users/Jed/GitHub/project_awesome')
+sys.path.insert(0, 'C:\Users\krish\OneDrive\Documents\Personal\Science\MASTERS\Semester 2\Complex System Simulations\CODE\project_awesome')
 import generate_network as gn
 import dynamics_network as dn
 import analyze_network as an
