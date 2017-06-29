@@ -35,15 +35,13 @@ parameters = {"quick_repaying" : True,
 
 avalanche_sizes = []
 
-PARAMETER1 = "too_big_to_fail"
-PARAMETER2 = "too_big_to_spread"
+PARAMETER = 'panic_collection'
 PARAMETER_VALUES = [False, True]
 
 MEANS = []
 STD_DEVIATIONS = []
 for param in PARAMETER_VALUES:
-    parameters[PARAMETER1] = param
-    parameters[PARAMETER2] = param
+    parameters[PARAMETER] = param
     for i in range(100):
         network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", "rb" ))
         network.graph['Tl'] = -2

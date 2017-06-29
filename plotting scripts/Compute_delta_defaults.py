@@ -30,25 +30,27 @@ parameters = {"quick_repaying" : True,
               "too_big_to_spread": False,
               "panic_collection": True,
               "BALANCE" : 0,
-              "DELTA" : 100,
+              "DELTA" : 1,
               "infections_on": True}
 
 avalanche_sizes = []
 
-DELTAS = [25, 50, 75, 100]
-BALANCE_mean = []
-BALANCE_sd = []
-for D in DELTAS:
-    parameters['DELTAS'] = D
+PARAMETER = 'DELTA'
+PARAMETER_VALUES = [0.25, 0.5, 0.75, 1]
+
+MEANS = []
+STD_DEVIATIONS = []
+for param in PARAMETER_VALUES:
+    parameters[PARAMETER] = param
     for i in range(100):
         network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", "rb" ))
         network.graph['Tl'] = -2
         network.graph['Ts'] = -40
         # Each sim outputs a list of avalanche sizes
         avalanche_sizes.append(dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = False))
-    total_default_list = [sum(lst)/1000.0 for lst in avalanche_sizes]
-    BALANCE_mean.append(np.mean(total_default_list))
-    BALANCE_sd.append(np.std(total_default_list))
+    total_default_list = [sum(lst)/len(network.nodes()) for lst in avalanche_sizes]
+    MEANS.append(np.mean(total_default_list))
+    STD_DEVIATIONS.append(np.std(total_default_list))
 
-plt.errorbar(DELTAS, BALANCE_mean, BALANCE_sd)
+plt.errorbar(PARAMETER_VALUES, MEANS, STD_DEVIATIONS)
 plt.show()
