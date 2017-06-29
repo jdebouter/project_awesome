@@ -39,7 +39,7 @@ parameters = {"quick_repaying" : True,
 
 PARAMETER = 'BALANCE'
 #PARAMETER_VALUES = [0, 3]
-PARAMETER_VALUES =  [0, 1, 2, 3]
+PARAMETER_VALUES =  [0, 1, 2, 3, 4, 5]
 
 avalanche_sizes_all_parameters = []
 

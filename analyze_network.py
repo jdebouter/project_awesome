@@ -107,6 +107,6 @@ def confidencePlot(parametervalues, mean, std):
         plt.xticks(parametervalues, ['False', 'True'])
     xmin, xmax = plt.xlim()
     ymin, ymax = plt.ylim()
-    plt.xlim((xmin-0.5, xmax+0.5))
+    plt.xlim((xmin-0.1, xmax+0.1))
     plt.ylim((ymin-1, ymax+1))
     # plt.show()
