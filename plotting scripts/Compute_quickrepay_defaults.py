@@ -33,8 +33,6 @@ parameters = {"quick_repaying" : True,
               "DELTA" : 1,
               "infections_on": True}
 
-avalanche_sizes = []
-
 PARAMETER = 'panic_collection'
 PARAMETER_VALUES = [False, True]
 

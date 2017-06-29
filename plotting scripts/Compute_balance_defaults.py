@@ -33,8 +33,6 @@ parameters = {"quick_repaying" : True,
               "DELTA" : 1,
               "infections_on": True}
 
-avalanche_sizes = []
-
 PARAMETER = 'BALANCE'
 PARAMETER_VALUES = [0, 1, 2, 3]
 
