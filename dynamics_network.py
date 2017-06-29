@@ -15,12 +15,6 @@ UNIT = 100  # Multiply everything by this value
 BALANCE = 0 * UNIT
 DELTA = 100
 
-''' Default dictionary of parameters which vary the implementation details '''
-default_parameters = {"quick_repaying" : True,
-                      "diversify_trade" : True,
-                      "too_big_to_fail" : False,
-                      "panic_collection" : True}
-
 ''' Run the simulation for T iterations '''
 def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
     global BALANCE
@@ -177,7 +171,7 @@ def check_and_propagate_avalanche(network, avalanche_sizes, parameters):
             # If we're doing the 'too big to fail' policy, inject hubs with money
             while True:
                 # Within one iteration, all infected nodes collect money and infect neighbors, and new bankruptcies happen
-                if parameters['infections_on']:
+                if parameters['panic_mode']:
                     _collect_money_and_spread_infection(infected_banks, parameters)  # Infected nodes collect money from neighbors and infect them
                 bankrupt_banks = _find_bankruptcies(network)  # Find any new bankruptcies
                 _infect_neighbours(bankrupt_banks, parameters)  # Make neighbors of new bankruptcies also infected
@@ -233,7 +227,7 @@ def _get_money(node_list, parameters, infection_happening = False):
         if node.getLiquidity() < 0 or infection_happening:
             # Get a list of the neighbors who have borrowed money from this node
             borrowers = node.getBorrowers()
-            if parameters['panic_collection'] and infection_happening:
+            if not parameters['panic_reduced'] and infection_happening:
                 money_needed = abs(node.getTotalDebt())
             elif infection_happening:
                 money_needed = node.getMoneyLost()
