@@ -41,7 +41,8 @@ def histogram_avalanches(avalanche_sizes, avalanche_sizes2 = None, num_bins = 50
     plt.xlabel("Avalanche Size")
     plt.ylabel("Frequency")
     ax = plt.gca()
-    ax.legend(loc='lower left')
+    ax.legend()
+    # ax.legend(loc='lower left')
     plt.show()
 
 def plot_network(network):
@@ -52,4 +53,41 @@ def plot_network(network):
 
 def calc_average_degree(network):
     return np.mean(list(network.degree().values()))
+
+from scipy import stats
+# import statsmodels.api as sm
+def fit_line(x, y):
+    p, V = np.polyfit(x, y, 1, cov=True)
+    slope = p[0]
+    intercept = p[1]
+    slope_confidence_interval = np.sqrt(V[0][0])
+    intercept_confidence_interval = np.sqrt(V[1][1])
+    return slope, intercept, slope_confidence_interval, intercept_confidence_interval
+    
+def histogram_avalanches(avalanche_sizes, num_bins):
+    hist, bin_edges = np.histogram(avalanche_sizes, bins=num_bins)
+    return hist, bin_edges
+
+''' Plot a histogram of the avalanche sizes '''
+def plot_avalanches(avalanche_sizes, label, color, num_bins = 100):
+    # Setup plot.
+    font = {'family' : 'normal', 'weight' : 'bold', 'size'   : 16}
+    mpl.rc('font', **font)
+    plt.yscale('log')
+    plt.xscale('log')
+
+    # Plot histogram
+    hist, bin_edges = histogram_avalanches(avalanche_sizes, num_bins)
+    x = np.linspace(1, max(avalanche_sizes), num_bins) 
+    plt.plot(x, hist, '*', label=label, color=color)
+
+    y = hist[hist>0]
+    x = x[hist>0]
+        
+    slope, intercept, slope_confidence_interval, intercept_confidence_interval = fit_line(np.log(x), np.log(y))
+    y_fit = np.power(x, slope) * np.exp(intercept)
+    plt.plot(x, y_fit, alpha=.5, color=color)
+    plt.show()
+
+    return slope, intercept, slope_confidence_interval, intercept_confidence_interval
 

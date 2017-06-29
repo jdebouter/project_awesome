@@ -49,7 +49,7 @@ def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
         if t % 50 == 0:
             print("ITERATION %i" % t)
         # Generate random perturbations in the liquidity for each node
-        perturb(network)
+        perturb(network, parameters)
 
         # If the "too big to fail" policy is being implemented, these nodes should check if they can repay their government loan
         if parameters['too_big_to_fail']:
@@ -83,12 +83,15 @@ FUNCTIONS USED IN run_simulation()
 =========================================================================== '''
 
 ''' Each bank gets or loses some capital randomly (delta=1 v delta=-1) '''
-def perturb(network):
+def perturb(network, parameters):
     for node in network.nodes():  # data=True makes it retrieve all extra attributes
         # Randomly generate delta
 #        scale = int((len(node.getNeighbours()))**0.5)
-        scale = 1
+        scale = parameters['scale']
         delta = random.choice([-DELTA*scale, DELTA*scale])
+        # if delta == 25:
+            # print (delta)
+        # print (delta)
         # Update liquidity and capital
         node.changeLiquidity(delta)
         node.changeCapital(delta)
