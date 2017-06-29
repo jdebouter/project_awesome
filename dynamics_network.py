@@ -28,6 +28,10 @@ def run_simulation(network, T, parameters = None, DEBUG_BOOL = False):
     if BALANCE < 100:
         BALANCE *= UNIT
     print("BALANCE: %i" % BALANCE)
+    global DELTA
+    DELTA = parameters['DELTA']
+    if DELTA < 1:
+        DELTA = round(DELTA * UNIT)
     
     # If no parameters were input, just use the default parameters
     if parameters is None:
