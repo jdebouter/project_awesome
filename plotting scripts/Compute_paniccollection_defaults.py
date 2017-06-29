@@ -50,27 +50,35 @@ c_means = []
 c_errors = []
 
 for param in PARAMETER_VALUES:
+    # Avalanche_sizes is a list of lists, the sublists contain the avalanche sizes for an individual run
     avalanche_sizes = []
+    m_vals = []
+    c_vals = []
     parameters[PARAMETER] = param
-    for i in range(2):
+    for i in range(5):
         network = pickle.load(open("../MEAN_FIELD_SAVED/mean_field_N100_tl-2_ts-40.pickle", "rb" ))
         network.graph['Tl'] = -2
         network.graph['Ts'] = -40
         # Each sim outputs a list of avalanche sizes
-        avalanche_sizes.append(dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = False))
+        results = dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = False)
+        # print (results)
+        avalanche_sizes.append(results)
+        # flatten = np.array([val for sublist in results for val in sublist])
+        m, c, m_error, c_error = an.plot_avalanches(results, label='_', color='k', num_bins = 100)
+        m_vals += [m]
+        c_vals += [c]
+    # Total_default_list is a list of single statistics per run, the total number of defaults
     total_default_list = [sum(lst)/len(network.nodes()) for lst in avalanche_sizes]
 
-    flatten = np.array([val for sublist in avalanche_sizes for val in sublist])
-    m, c, m_error, c_error = an.plot_avalanches(flatten, label='', color='', num_bins = 100)
-    m_means.append(m)
-    m_errors.append(m_error)
-    c_means.append(c)
-    c_errors.append(c_error)
+    m_means.append(np.mean(m_vals))
+    m_errors.append(1.96 * np.std(m_vals) / np.sqrt(len(m_vals)) )
+    c_means.append(np.mean(c_vals))
+    c_errors.append(1.96 * np.std(c_vals) / np.sqrt(len(c_vals)) )
 
     avalanche_sizes_all_parameters.append(avalanche_sizes)
+    # MEANS is a list containing the average of the total # of defaults, for all different parameter values (eg balance 0, 1, 2 ,3)
     MEANS.append(np.mean(total_default_list))
-    STD_DEVIATIONS.append(np.std(total_default_list))
-
+    STD_DEVIATIONS.append(1.96 * np.std(total_default_list) / np.sqrt(len(total_default_list)) )
 plt.figure(1)
 h1 = avalanche_sizes_all_parameters[0]
 h2 = avalanche_sizes_all_parameters[-1]
