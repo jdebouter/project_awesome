@@ -33,19 +33,17 @@ parameters = {"quick_repaying" : True,
               "DELTA" : 1,
               "infections_on": True}
 
-avalanche_sizes_all_parameters = []
-
-PARAMETER1 = "too_big_to_fail"
-PARAMETER2 = "too_big_to_spread"
+PARAMETER = 'panic_collection'
 PARAMETER_VALUES = [False, True]
+
+avalanche_sizes_all_parameters = []
 
 MEANS = []
 STD_DEVIATIONS = []
 for param in PARAMETER_VALUES:
     avalanche_sizes = []
-    parameters[PARAMETER1] = param
-    parameters[PARAMETER2] = param
-    for i in range(100):
+    parameters[PARAMETER] = param
+    for i in range(10):
         network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", "rb" ))
         network.graph['Tl'] = -2
         network.graph['Ts'] = -40
@@ -56,5 +54,8 @@ for param in PARAMETER_VALUES:
     MEANS.append(np.mean(total_default_list))
     STD_DEVIATIONS.append(np.std(total_default_list))
 
+# PLOT TOTAL DEFAULT MEANS WITH CONFIDENCE INTERAVLS
 plt.errorbar(PARAMETER_VALUES, MEANS, STD_DEVIATIONS)
 plt.show()
+
+# PLOT AVALANCHE DISTRIBUTIONS
