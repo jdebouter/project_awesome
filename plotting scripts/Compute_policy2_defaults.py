@@ -33,7 +33,7 @@ parameters = {"quick_repaying" : True,
               "DELTA" : 1,
               "infections_on": True}
 
-avalanche_sizes = []
+avalanche_sizes_all_parameters = []
 
 PARAMETER1 = "too_big_to_fail"
 PARAMETER2 = "too_big_to_spread"
@@ -42,6 +42,7 @@ PARAMETER_VALUES = [False, True]
 MEANS = []
 STD_DEVIATIONS = []
 for param in PARAMETER_VALUES:
+    avalanche_sizes = []
     parameters[PARAMETER1] = param
     parameters[PARAMETER2] = param
     for i in range(100):
@@ -51,6 +52,7 @@ for param in PARAMETER_VALUES:
         # Each sim outputs a list of avalanche sizes
         avalanche_sizes.append(dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = False))
     total_default_list = [sum(lst)/len(network.nodes()) for lst in avalanche_sizes]
+    avalanche_sizes_all_parameters.append(avalanche_sizes)
     MEANS.append(np.mean(total_default_list))
     STD_DEVIATIONS.append(np.std(total_default_list))
 

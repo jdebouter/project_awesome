@@ -30,11 +30,7 @@ parameters = {"quick_repaying" : True,
               "BALANCE" : 0,
               "infections_on": True}
 
-#pickle.dump(network, open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", 'wb'))
 network = pickle.load(open("MEAN_FIELD_SAVED\mean_field_N100_tl-2_ts-40.pickle", "rb" ))
-network.graph['hubs'] = dn._find_hubs(network)
-print("hubs: %i" % len(network.graph['hubs']))
-
 avalanche_sizes, avalanche_sizes2 = [], []
 
 for i in range(10):
