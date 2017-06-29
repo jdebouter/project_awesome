@@ -63,13 +63,13 @@ def fit_line(x, y):
     slope_confidence_interval = np.sqrt(V[0][0])
     intercept_confidence_interval = np.sqrt(V[1][1])
     return slope, intercept, slope_confidence_interval, intercept_confidence_interval
-    
+
 def histogram_avalanches(avalanche_sizes, num_bins):
     hist, bin_edges = np.histogram(avalanche_sizes, bins=num_bins)
     return hist, bin_edges
 
 ''' Plot a histogram of the avalanche sizes '''
-def plot_avalanches(avalanche_sizes, label, color, num_bins = 100):
+def plot_avalanches(avalanche_sizes, label, color, token='*', num_bins = 100, plot = False):
     # Setup plot.
     font = {'family' : 'normal', 'weight' : 'bold', 'size'   : 16}
     mpl.rc('font', **font)
@@ -78,16 +78,35 @@ def plot_avalanches(avalanche_sizes, label, color, num_bins = 100):
 
     # Plot histogram
     hist, bin_edges = histogram_avalanches(avalanche_sizes, num_bins)
-    x = np.linspace(1, max(avalanche_sizes), num_bins) 
-    plt.plot(x, hist, '*', label=label, color=color)
+    x = np.linspace(1, max(avalanche_sizes), num_bins)
+    if plot:
+        plt.plot(x, hist, token, label=label, color=color)
 
     y = hist[hist>0]
     x = x[hist>0]
-        
+
     slope, intercept, slope_confidence_interval, intercept_confidence_interval = fit_line(np.log(x), np.log(y))
     y_fit = np.power(x, slope) * np.exp(intercept)
-    plt.plot(x, y_fit, alpha=.5, color=color)
-    plt.show()
+    if plot:
+        plt.plot(x, y_fit, alpha=.5, color=color)
+    # plt.show()
 
     return slope, intercept, slope_confidence_interval, intercept_confidence_interval
 
+
+def confidencePlot(parametervalues, mean, std):
+
+#    font = {'family' : 'normal', 'weight' : 'bold', 'size' : 16}
+#    mpl.rc('font', **font)
+#
+    if len(parametervalues) > 2:
+        plt.errorbar(parametervalues, mean, yerr=std, color='b', fmt='--o')
+    else:
+        plt.errorbar(parametervalues[0], mean[0], yerr=std[0], fmt='o')
+        plt.errorbar(parametervalues[1], mean[1], yerr=std[1], fmt='o')
+        plt.xticks(parametervalues, ['False', 'True'])
+    xmin, xmax = plt.xlim()
+    ymin, ymax = plt.ylim()
+    plt.xlim((xmin-0.5, xmax+0.5))
+    plt.ylim((ymin-1, ymax+1))
+    # plt.show()

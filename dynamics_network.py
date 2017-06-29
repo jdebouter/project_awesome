@@ -92,7 +92,8 @@ def perturb(network, parameters):
     for node in network.nodes():  # data=True makes it retrieve all extra attributes
         # Randomly generate delta
 #        scale = int((len(node.getNeighbours()))**0.5)
-        scale = parameters['scale']
+        # scale = parameters['scale']
+        scale = 1
         delta = random.choice([-DELTA*scale, DELTA*scale])
         # if delta == 25:
             # print (delta)
