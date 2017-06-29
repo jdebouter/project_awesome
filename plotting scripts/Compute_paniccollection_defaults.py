@@ -31,12 +31,11 @@ parameters = {"quick_repaying" : True,
               "diversify_trade" : True,
               "too_big_to_fail" : False,  # (This one is useless in a regular grid)
               "too_big_to_spread": False,
-              "panic_collection": True,
               "BALANCE" : 0,
               "DELTA" : 1,
               "infections_on": True}
 
-PARAMETER = 'panic_collection'
+PARAMETER = 'panic_mode'
 PARAMETER_VALUES = [False, True]
 
 avalanche_sizes_all_parameters = []

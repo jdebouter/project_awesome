@@ -95,5 +95,3 @@ plt.figure('intercept')
 # PLOT TOTAL DEFAULT MEANS WITH CONFIDENCE INTERAVLS
 an.confidencePlot(PARAMETER_VALUES, c_means, c_errors)
 plt.show()
-
-# PLOT AVALANCHE DISTRIBUTIONS
