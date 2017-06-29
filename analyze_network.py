@@ -100,13 +100,13 @@ def confidencePlot(parametervalues, mean, std):
 #    mpl.rc('font', **font)
 #
     if len(parametervalues) > 2:
-        plt.errorbar(parametervalues, mean, yerr=std, color='b', fmt='--o')
+        plt.errorbar(parametervalues, mean, yerr=std, color='b', fmt='--o', capsize=4)
     else:
-        plt.errorbar(parametervalues[0], mean[0], yerr=std[0], fmt='o')
-        plt.errorbar(parametervalues[1], mean[1], yerr=std[1], fmt='o')
+        plt.errorbar(parametervalues[0], mean[0], yerr=std[0], fmt='o', capsize=4, color='b')
+        plt.errorbar(parametervalues[1], mean[1], yerr=std[1], fmt='o', capsize=4, color='g')
         plt.xticks(parametervalues, ['False', 'True'])
     xmin, xmax = plt.xlim()
     ymin, ymax = plt.ylim()
-    plt.xlim((xmin-0.5, xmax+0.5))
+    plt.xlim((xmin-0.1, xmax+0.1))
     plt.ylim((ymin-1, ymax+1))
     # plt.show()

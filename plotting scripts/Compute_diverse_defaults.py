@@ -37,10 +37,10 @@ parameters = {"quick_repaying" : True,
               "panic_reduced" : False,
               "infections_on": True}
 
-PARAMETER = 'quick_repaying'
-PARAMETER_VALUES = [False, True]
-
 avalanche_sizes_all_parameters = []
+
+PARAMETER = "diversify_trade"
+PARAMETER_VALUES = [False, True]
 
 MEANS = []
 STD_DEVIATIONS = []
@@ -54,8 +54,10 @@ for param in PARAMETER_VALUES:
     avalanche_sizes = []
     m_vals = []
     c_vals = []
+    # parameters[PARAMETER] = param
     parameters[PARAMETER] = param
-    for i in range(5):
+    # parameters[PARAMETER2] = param
+    for i in range(50):
         # network = pickle.load(open("../MEAN_FIELD_SAVED/mean_field_N100_tl-2_ts-40.pickle", "rb" ))
         network = pickle.load(open("../MEAN_FIELD_SAVED/mean_field_N100_tl-2_ts-40.pickle", "rb" ))
         network.graph['Tl'] = -2
@@ -86,18 +88,39 @@ for param in PARAMETER_VALUES:
     MEANS.append(np.mean(total_default_list))
     STD_DEVIATIONS.append(1.96 * np.std(total_default_list) / np.sqrt(len(total_default_list)) )
 
+    # avalanche_sizes = []
+    # parameters[PARAMETER1] = param
+    # parameters[PARAMETER2] = param
+    # for i in range(2):
+    #     network = pickle.load(open("../MEAN_FIELD_SAVED/mean_field_N100_tl-2_ts-40.pickle", "rb" ))
+    #     network.graph['Tl'] = -2
+    #     network.graph['Ts'] = -40
+    #     # Each sim outputs a list of avalanche sizes
+    #     avalanche_sizes.append(dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = False))
+    # total_default_list = [sum(lst)/len(network.nodes()) for lst in avalanche_sizes]
+    #
+    # flatten = np.array([val for sublist in avalanche_sizes for val in sublist])
+    # m, c, m_error, c_error = an.plot_avalanches(flatten, label='', color='', num_bins = 100)
+    # m_means.append(m)
+    # m_errors.append(m_error)
+    # c_means.append(c)
+    # c_errors.append(c_error)
+    #
+    # avalanche_sizes_all_parameters.append(avalanche_sizes)
+    # MEANS.append(np.mean(total_default_list))
+    # STD_DEVIATIONS.append(np.std(total_default_list))
+
 plt.figure(1)
 h1 = avalanche_sizes_all_parameters[0]
 h2 = avalanche_sizes_all_parameters[-1]
 f1 = np.array([val for sublist in h1 for val in sublist])
 f2 = np.array([val for sublist in h2 for val in sublist])
-an.plot_avalanches(f1, label='quick_repaying=False', color='b', token='*', num_bins = 100, plot=True)
-an.plot_avalanches(f2, label='quick_repaying=True', color='g', token='>', num_bins = 100, plot=True)
+an.plot_avalanches(f1, label='Diversify Trade', color='b', token='*', num_bins = 100, plot=True)
+an.plot_avalanches(f2, label='Not Diverse', color='g', token='>', num_bins = 100, plot=True)
 plt.xlabel('Avalanche Sizes')
 plt.ylabel('Frequency')
 plt.legend()
 
-# PLOT TOTAL DEFAULT MEANS WITH CONFIDENCE INTERAVLS
 plt.figure('default size')
 # PLOT TOTAL DEFAULT MEANS WITH CONFIDENCE INTERAVLS
 an.confidencePlot(PARAMETER_VALUES, MEANS, STD_DEVIATIONS)

@@ -57,8 +57,9 @@ for param in PARAMETER_VALUES:
     c_vals = []
     # parameters[PARAMETER] = param
     parameters[PARAMETER1] = param
-    parameters[PARAMETER2] = param
-    for i in range(5):
+    # parameters[PARAMETER2] = param
+    for i in range(50):
+        # network = pickle.load(open("../MEAN_FIELD_SAVED/mean_field_N100_tl-2_ts-40.pickle", "rb" ))
         network = pickle.load(open("../MEAN_FIELD_SAVED/mean_field_N100_tl-2_ts-40.pickle", "rb" ))
         network.graph['Tl'] = -2
         network.graph['Ts'] = -40
@@ -66,18 +67,22 @@ for param in PARAMETER_VALUES:
         results = dn.run_simulation(network, 1000, parameters, DEBUG_BOOL = False)
         # print (results)
         avalanche_sizes.append(results)
-        # flatten = np.array([val for sublist in results for val in sublist])
-        m, c, m_error, c_error = an.plot_avalanches(results, label='_', color='k', num_bins = 100)
-        m_vals += [m]
-        c_vals += [c]
+    flatten = np.array([val for sublist in avalanche_sizes for val in sublist])
+    m, c, m_error, c_error = an.plot_avalanches(flatten, label='_', color='k', num_bins = 100)
+        # m_vals += [m]
+        # c_vals += [c]
     # Total_default_list is a list of single statistics per run, the total number of defaults
     total_default_list = [sum(lst)/len(network.nodes()) for lst in avalanche_sizes]
-    print (m_vals)
-    m_means.append(np.mean(m_vals))
-    m_errors.append(1.96 * np.std(m_vals) / np.sqrt(len(m_vals)) )
-    c_means.append(np.mean(c_vals))
-    c_errors.append(1.96 * np.std(c_vals) / np.sqrt(len(c_vals)) )
 
+    # m_means.append(np.mean(m_vals))
+    # m_errors.append(1.96 * np.std(m_vals) / np.sqrt(len(m_vals)) )
+    # c_means.append(np.mean(c_vals))
+    # c_errors.append(1.96 * np.std(c_vals) / np.sqrt(len(c_vals)) )
+
+    m_means.append(m)
+    m_errors.append(m_error)
+    c_means.append(c)
+    c_errors.append(c_error)
     avalanche_sizes_all_parameters.append(avalanche_sizes)
     # MEANS is a list containing the average of the total # of defaults, for all different parameter values (eg balance 0, 1, 2 ,3)
     MEANS.append(np.mean(total_default_list))
@@ -110,8 +115,8 @@ h1 = avalanche_sizes_all_parameters[0]
 h2 = avalanche_sizes_all_parameters[-1]
 f1 = np.array([val for sublist in h1 for val in sublist])
 f2 = np.array([val for sublist in h2 for val in sublist])
-an.plot_avalanches(f1, label='too_big_to_fail', color='b', token='*', num_bins = 100, plot=True)
-an.plot_avalanches(f2, label='too_big_to_spread', color='g', token='>', num_bins = 100, plot=True)
+an.plot_avalanches(f1, label='Default', color='b', token='*', num_bins = 100, plot=True)
+an.plot_avalanches(f2, label='Too Big To Fail', color='g', token='>', num_bins = 100, plot=True)
 plt.xlabel('Avalanche Sizes')
 plt.ylabel('Frequency')
 plt.legend()
